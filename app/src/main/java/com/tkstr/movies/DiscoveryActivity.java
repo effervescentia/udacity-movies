@@ -13,6 +13,7 @@ import static com.tkstr.movies.DiscoveryFragment.SORT_RATING;
 public class DiscoveryActivity extends AppCompatActivity {
 
     private DiscoveryFragment fragment;
+    private static final String FRAGMENT_TAG = "frg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +24,10 @@ public class DiscoveryActivity extends AppCompatActivity {
             fragment = new DiscoveryFragment();
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.discovery_fragment, fragment)
+                    .add(R.id.discovery_fragment, fragment, FRAGMENT_TAG)
                     .commit();
+        } else {
+            fragment = (DiscoveryFragment) getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
         }
     }
 
