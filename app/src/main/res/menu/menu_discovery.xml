@@ -1,6 +1,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".DiscoveryActivity">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".DiscoveryActivity">
+
+    <item
+        android:id="@+id/action_sort"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:orderInCategory="100"
+        android:title="@string/action_sort"
+        app:showAsAction="always">
+
+        <menu>
+            <item
+                android:id="@+id/sort_popularity"
+                android:title="@string/popularity" />
+
+            <item
+                android:id="@+id/sort_rating"
+                android:title="@string/rating" />
+        </menu>
+
+    </item>
 </menu>
