@@ -13,11 +13,13 @@
         <menu>
             <item
                 android:id="@+id/sort_popularity"
-                android:title="@string/popularity" />
+                android:title="@string/popularity"
+                android:checkable="true"/>
 
             <item
                 android:id="@+id/sort_rating"
-                android:title="@string/rating" />
+                android:title="@string/rating"
+                android:checkable="true"/>
         </menu>
 
     </item>

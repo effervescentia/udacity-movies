@@ -39,6 +39,30 @@ public class DiscoveryActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        setSelection(menu);
+        return super.onMenuOpened(featureId, menu);
+    }
+
+    private void setSelection(Menu menu) {
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            if (item.isCheckable()) {
+                item.setChecked(false);
+            }
+        }
+
+        switch (fragment.getSort()) {
+            case SORT_POPULARITY:
+                menu.findItem(R.id.sort_popularity).setChecked(true);
+                break;
+            case SORT_RATING:
+                menu.findItem(R.id.sort_rating).setChecked(true);
+                break;
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -47,10 +71,10 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         if (id == R.id.sort_popularity) {
             Toast.makeText(getApplicationContext(), "Sorting movies by popularity", LENGTH_SHORT).show();
-            fragment.reload(SORT_POPULARITY);
+            fragment.setSort(SORT_POPULARITY).reload();
         } else if (id == R.id.sort_rating) {
             Toast.makeText(getApplicationContext(), "Sorting movies by rating", LENGTH_SHORT).show();
-            fragment.reload(SORT_RATING);
+            fragment.setSort(SORT_RATING).reload();
         }
         return super.onOptionsItemSelected(item);
     }

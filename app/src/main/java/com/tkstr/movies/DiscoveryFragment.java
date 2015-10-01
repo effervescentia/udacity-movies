@@ -27,14 +27,18 @@ public class DiscoveryFragment extends Fragment {
     public static final String SORT_POPULARITY = "popularity.desc";
     public static final String SORT_RATING = "vote_count.desc";
     public static final String MOVIE_KEY = "movies";
+    public static final String SORT_KEY = "sort";
+
     private PosterAdapter adapter;
     private ArrayList<PosterAdapter.MovieHolder> movies = new ArrayList<>();
+    private String sort = SORT_POPULARITY;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             movies = savedInstanceState.getParcelableArrayList(MOVIE_KEY);
+            sort = savedInstanceState.getString(SORT_KEY);
         }
     }
 
@@ -46,7 +50,7 @@ public class DiscoveryFragment extends Fragment {
         GridView posterGrid = (GridView) v;
         adapter = new PosterAdapter(getContext(), movies);
         if (emptyIfNull(movies).isEmpty()) {
-            reload(SORT_POPULARITY);
+            reload();
         }
         posterGrid.setAdapter(adapter);
         posterGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -67,11 +71,21 @@ public class DiscoveryFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(MOVIE_KEY, movies);
+        outState.putString(SORT_KEY, sort);
     }
 
-    public void reload(String sort) {
+    public DiscoveryFragment setSort(String sort) {
+        this.sort = sort;
+        return this;
+    }
+
+    public String getSort() {
+        return sort;
+    }
+
+    public void reload() {
         if (hasNetworkAccess()) {
-            Log.d(getClass().getSimpleName(), "reloading movie list");
+            Log.d(getClass().getSimpleName(), "reloading movie list with sort: " + sort);
             new MovieUpdateTask(getContext(), adapter).execute(sort);
         } else {
             Toast.makeText(getContext(), "Unable to connect to network", LENGTH_SHORT).show();
