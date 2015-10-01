@@ -74,7 +74,9 @@ public class MovieUpdateTask extends AsyncTask<String, Void, String> {
                 adapter.clear();
                 adapter.addAll(parseJson(result));
             }
-            progress.dismiss();
+            if (progress.isShowing()) {
+                progress.dismiss();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

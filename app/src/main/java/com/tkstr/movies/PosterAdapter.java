@@ -1,6 +1,8 @@
 package com.tkstr.movies;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -8,7 +10,9 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ben Teichman
@@ -40,8 +44,45 @@ public class PosterAdapter extends ArrayAdapter<PosterAdapter.MovieHolder> {
         return image;
     }
 
-    public static class MovieHolder {
+    public static class MovieHolder implements Parcelable {
+        private static final String ID_KEY = "id";
+        private static final String IMAGE_KEY = "image";
+
         String id;
         String image;
+
+        public MovieHolder() {
+        }
+
+        protected MovieHolder(Parcel in) {
+            @SuppressWarnings("unchecked") HashMap<String, String> map = in.readHashMap(ClassLoader.getSystemClassLoader());
+            id = map.get(ID_KEY);
+            image = map.get(IMAGE_KEY);
+        }
+
+        public static final Creator<MovieHolder> CREATOR = new Creator<MovieHolder>() {
+            @Override
+            public MovieHolder createFromParcel(Parcel in) {
+                return new MovieHolder(in);
+            }
+
+            @Override
+            public MovieHolder[] newArray(int size) {
+                return new MovieHolder[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            Map<String, String> map = new HashMap<>();
+            map.put(ID_KEY, id);
+            map.put(IMAGE_KEY, image);
+            dest.writeMap(map);
+        }
     }
 }
