@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.tkstr.movies.DiscoveryFragment.SORT_FAVORITES;
 import static com.tkstr.movies.DiscoveryFragment.SORT_POPULARITY;
 import static com.tkstr.movies.DiscoveryFragment.SORT_RATING;
 
@@ -59,6 +60,9 @@ public class DiscoveryActivity extends AppCompatActivity {
             case SORT_RATING:
                 menu.findItem(R.id.sort_rating).setChecked(true);
                 break;
+            case SORT_FAVORITES:
+                menu.findItem(R.id.sort_favorites).setChecked(true);
+                break;
         }
     }
 
@@ -69,13 +73,23 @@ public class DiscoveryActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.sort_popularity) {
-            Toast.makeText(getApplicationContext(), "Sorting movies by popularity", LENGTH_SHORT).show();
-            fragment.setSort(SORT_POPULARITY).reload();
-        } else if (id == R.id.sort_rating) {
-            Toast.makeText(getApplicationContext(), "Sorting movies by rating", LENGTH_SHORT).show();
-            fragment.setSort(SORT_RATING).reload();
+        switch (id) {
+            case R.id.sort_popularity:
+                sort(SORT_POPULARITY, "Sorting movies by popularity");
+                break;
+            case R.id.sort_rating:
+                sort(SORT_RATING, "Sorting movies by rating");
+                break;
+            case R.id.sort_favorites:
+                sort(SORT_FAVORITES, "Loading favorite movies");
+                break;
         }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    private void sort(String sort, String message) {
+        Toast.makeText(getApplicationContext(), message, LENGTH_SHORT).show();
+        fragment.setSort(sort).reload();
     }
 }

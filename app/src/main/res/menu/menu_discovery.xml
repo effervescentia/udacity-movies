@@ -13,13 +13,18 @@
         <menu>
             <item
                 android:id="@+id/sort_popularity"
-                android:title="@string/popularity"
-                android:checkable="true"/>
+                android:checkable="true"
+                android:title="@string/popularity" />
 
             <item
                 android:id="@+id/sort_rating"
-                android:title="@string/rating"
-                android:checkable="true"/>
+                android:checkable="true"
+                android:title="@string/rating" />
+
+            <item
+                android:id="@+id/sort_favorites"
+                android:checkable="true"
+                android:title="@string/favorites" />
         </menu>
 
     </item>

@@ -3,6 +3,7 @@
     <string name="action_sort">Sort</string>
     <string name="popularity">Popularity</string>
     <string name="rating">Rating</string>
+    <string name="favorites">Favorites</string>
     <string name="title_activity_detail">Movie Details</string>
     <string name="favourite_me">mark as favourite</string>
     <string name="thumbnail_desc">movie poster thumbnail</string>

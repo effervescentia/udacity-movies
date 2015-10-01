@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.tkstr.movies.DetailFragment.ID_KEY;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 /**
@@ -26,18 +27,22 @@ public class DiscoveryFragment extends Fragment {
 
     public static final String SORT_POPULARITY = "popularity.desc";
     public static final String SORT_RATING = "vote_count.desc";
-    public static final String MOVIE_KEY = "movies";
+    public static final String SORT_FAVORITES = "favorites";
+    public static final String MOVIES_KEY = "movies";
+    public static final String FAVORITES_KEY = "favorites";
     public static final String SORT_KEY = "sort";
 
     private PosterAdapter adapter;
     private ArrayList<PosterAdapter.MovieHolder> movies = new ArrayList<>();
+    private ArrayList<PosterAdapter.MovieHolder> favorites = new ArrayList<>();
     private String sort = SORT_POPULARITY;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            movies = savedInstanceState.getParcelableArrayList(MOVIE_KEY);
+            movies = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
+            favorites = savedInstanceState.getParcelableArrayList(FAVORITES_KEY);
             sort = savedInstanceState.getString(SORT_KEY);
         }
     }
@@ -59,7 +64,7 @@ public class DiscoveryFragment extends Fragment {
                 String movieId = adapter.getItem(position).id;
 
                 Intent intent = new Intent(getContext(), DetailActivity.class);
-                intent.putExtra("id", movieId);
+                intent.putExtra(ID_KEY, movieId);
                 startActivity(intent);
             }
         });
@@ -70,7 +75,8 @@ public class DiscoveryFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(MOVIE_KEY, movies);
+        outState.putParcelableArrayList(MOVIES_KEY, movies);
+        outState.putParcelableArrayList(FAVORITES_KEY, favorites);
         outState.putString(SORT_KEY, sort);
     }
 
@@ -85,8 +91,14 @@ public class DiscoveryFragment extends Fragment {
 
     public void reload() {
         if (hasNetworkAccess()) {
-            Log.d(getClass().getSimpleName(), "reloading movie list with sort: " + sort);
-            new MovieUpdateTask(getContext(), adapter).execute(sort);
+            if (SORT_FAVORITES.equals(sort)) {
+                Log.d(getClass().getSimpleName(), "restoring movie list from favorites");
+                adapter.clear();
+                adapter.addAll(favorites);
+            } else {
+                Log.d(getClass().getSimpleName(), "reloading movie list with sort: " + sort);
+                new MovieUpdateTask(getContext(), adapter).execute(sort);
+            }
         } else {
             Toast.makeText(getContext(), "Unable to connect to network", LENGTH_SHORT).show();
         }
