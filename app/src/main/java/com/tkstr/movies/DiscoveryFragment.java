@@ -13,11 +13,14 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.tkstr.movies.PosterAdapter.MovieHolder;
+
 import java.util.ArrayList;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.widget.Toast.LENGTH_SHORT;
 import static com.tkstr.movies.DetailFragment.ID_KEY;
+import static com.tkstr.movies.DetailFragment.TITLE_KEY;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 /**
@@ -33,8 +36,8 @@ public class DiscoveryFragment extends Fragment {
     public static final String SORT_KEY = "sort";
 
     private PosterAdapter adapter;
-    private ArrayList<PosterAdapter.MovieHolder> movies = new ArrayList<>();
-    private ArrayList<PosterAdapter.MovieHolder> favorites = new ArrayList<>();
+    private ArrayList<MovieHolder> movies = new ArrayList<>();
+    private String[] favorites = new String[]{};
     private String sort = SORT_POPULARITY;
 
     @Override
@@ -42,7 +45,7 @@ public class DiscoveryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             movies = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
-            favorites = savedInstanceState.getParcelableArrayList(FAVORITES_KEY);
+            favorites = savedInstanceState.getStringArray(FAVORITES_KEY);
             sort = savedInstanceState.getString(SORT_KEY);
         }
     }
@@ -61,10 +64,13 @@ public class DiscoveryFragment extends Fragment {
         posterGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String movieId = adapter.getItem(position).id;
+                MovieHolder movie = adapter.getItem(position);
+                String movieId = movie.id;
+                String title = movie.title;
 
                 Intent intent = new Intent(getContext(), DetailActivity.class);
                 intent.putExtra(ID_KEY, movieId);
+                intent.putExtra(TITLE_KEY, title);
                 startActivity(intent);
             }
         });
@@ -76,7 +82,7 @@ public class DiscoveryFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(MOVIES_KEY, movies);
-        outState.putParcelableArrayList(FAVORITES_KEY, favorites);
+        outState.putStringArray(FAVORITES_KEY, favorites);
         outState.putString(SORT_KEY, sort);
     }
 
@@ -93,11 +99,10 @@ public class DiscoveryFragment extends Fragment {
         if (hasNetworkAccess()) {
             if (SORT_FAVORITES.equals(sort)) {
                 Log.d(getClass().getSimpleName(), "restoring movie list from favorites");
-                adapter.clear();
-                adapter.addAll(favorites);
+                new FavoriteUpdateTask(getContext(), adapter).execute(favorites);
             } else {
                 Log.d(getClass().getSimpleName(), "reloading movie list with sort: " + sort);
-                new MovieUpdateTask(getContext(), adapter).execute(sort);
+                new TopUpdateTask(getContext(), adapter).execute(sort);
             }
         } else {
             Toast.makeText(getContext(), "Unable to connect to network", LENGTH_SHORT).show();

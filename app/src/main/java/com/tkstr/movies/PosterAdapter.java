@@ -47,9 +47,11 @@ public class PosterAdapter extends ArrayAdapter<PosterAdapter.MovieHolder> {
     public static class MovieHolder implements Parcelable {
         private static final String ID_KEY = "id";
         private static final String IMAGE_KEY = "image";
+        private static final String TITLE_KEY = "title";
 
         String id;
         String image;
+        String title;
 
         public MovieHolder() {
         }
@@ -58,6 +60,7 @@ public class PosterAdapter extends ArrayAdapter<PosterAdapter.MovieHolder> {
             @SuppressWarnings("unchecked") HashMap<String, String> map = in.readHashMap(ClassLoader.getSystemClassLoader());
             id = map.get(ID_KEY);
             image = map.get(IMAGE_KEY);
+            title = map.get(TITLE_KEY);
         }
 
         public static final Creator<MovieHolder> CREATOR = new Creator<MovieHolder>() {
@@ -82,6 +85,7 @@ public class PosterAdapter extends ArrayAdapter<PosterAdapter.MovieHolder> {
             Map<String, String> map = new HashMap<>();
             map.put(ID_KEY, id);
             map.put(IMAGE_KEY, image);
+            map.put(TITLE_KEY, title);
             dest.writeMap(map);
         }
     }

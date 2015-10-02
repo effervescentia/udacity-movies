@@ -26,17 +26,21 @@ public class DetailsTask extends AsyncTask<String, Void, String> {
     private DetailFragment fragment;
     private View view;
     private OkHttpClient client;
+    private String title;
+    private FavoritePrefs favorites;
 
-    public DetailsTask(DetailFragment fragment, View view) {
+    public DetailsTask(DetailFragment fragment, View view, String title) {
         this.fragment = fragment;
         this.view = view;
+        this.title = title;
         client = new OkHttpClient();
+        favorites = new FavoritePrefs(fragment.getActivity());
     }
 
     @Override
     protected void onPreExecute() {
         progress = new ProgressDialog(fragment.getContext());
-        progress.setMessage("Loading Details");
+        progress.setMessage(fragment.getResources().getString(R.string.loading_details) + title);
         progress.setIndeterminate(true);
         progress.setCancelable(false);
         progress.show();
@@ -79,12 +83,14 @@ public class DetailsTask extends AsyncTask<String, Void, String> {
         DetailHolder holder = new DetailHolder();
 
         JSONObject response = new JSONObject(json);
+        holder.id = response.getString("id");
         holder.title = response.getString("title");
         holder.image = response.getString("poster_path");
         holder.year = response.getString("release_date").split("-", 2)[0];
         holder.rating = response.getString("vote_average") + "/10";
         holder.runtime = response.getString("runtime") + "min";
         holder.description = response.getString("overview");
+        holder.favorite = favorites.isFavorite(holder.id);
 
         return holder;
     }

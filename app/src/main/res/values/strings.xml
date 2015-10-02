@@ -7,4 +7,14 @@
     <string name="title_activity_detail">Movie Details</string>
     <string name="favourite_me">mark as favourite</string>
     <string name="thumbnail_desc">movie poster thumbnail</string>
+
+    <!-- loading messages -->
+    <string name="loading_movies">Loading movies</string>
+    <string name="loading_favorites">Loading favorites</string>
+    <string name="loading_details">Loading details for </string>
+
+    <!-- sorting messages -->
+    <string name="sorting_popularity">Sorting movies by popularity</string>
+    <string name="sorting_rating">Sorting movies by rating</string>
+    <string name="sorting_favorite">Recalling favorite movies</string>
 </resources>

@@ -75,21 +75,21 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.sort_popularity:
-                sort(SORT_POPULARITY, "Sorting movies by popularity");
+                sort(SORT_POPULARITY, R.string.sorting_popularity);
                 break;
             case R.id.sort_rating:
-                sort(SORT_RATING, "Sorting movies by rating");
+                sort(SORT_RATING, R.string.sorting_rating);
                 break;
             case R.id.sort_favorites:
-                sort(SORT_FAVORITES, "Loading favorite movies");
+                sort(SORT_FAVORITES, R.string.sorting_favorite);
                 break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void sort(String sort, String message) {
-        Toast.makeText(getApplicationContext(), message, LENGTH_SHORT).show();
+    private void sort(String sort, int messageId) {
+        Toast.makeText(getApplicationContext(), getResources().getString(messageId), LENGTH_SHORT).show();
         fragment.setSort(sort).reload();
     }
 }

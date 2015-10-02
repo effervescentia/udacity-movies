@@ -19,18 +19,20 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * A placeholder fragment containing a simple view.
+ * @author Ben Teichman
  */
 public class DetailFragment extends Fragment {
 
+    private static final String LOG_KEY = DetailFragment.class.getSimpleName();
     private static final String THUMBNAIL_URL = "http://image.tmdb.org/t/p/w154";
     public static final String ID_KEY = "id";
-    public static final String DETAILS_KEY = "id";
+    public static final String TITLE_KEY = "title";
+    public static final String DETAILS_KEY = "details";
+
     private DetailHolder details;
+    private FavoritePrefs favorites;
 
     public DetailFragment() {
     }
@@ -41,6 +43,7 @@ public class DetailFragment extends Fragment {
         if (savedInstanceState != null) {
             details = savedInstanceState.getParcelable(DETAILS_KEY);
         }
+        favorites = new FavoritePrefs(getContext());
     }
 
     @Override
@@ -56,8 +59,9 @@ public class DetailFragment extends Fragment {
 
         if (details == null) {
             String id = getActivity().getIntent().getStringExtra(ID_KEY);
-            Log.d(getClass().getSimpleName(), "loading details for movie with id: " + id);
-            new DetailsTask(this, v).execute(id);
+            String title = getActivity().getIntent().getStringExtra(TITLE_KEY);
+            Log.d(LOG_KEY, "loading details for : " + title);
+            new DetailsTask(this, v, title).execute(id);
         } else {
             fillDetails(v);
         }
@@ -78,7 +82,7 @@ public class DetailFragment extends Fragment {
         TextView rating = (TextView) view.findViewById(R.id.rating);
         rating.setText(details.rating);
 
-        TextView description = (TextView) view.findViewById(R.id.description);
+        final TextView description = (TextView) view.findViewById(R.id.description);
         description.setText(details.description);
 
         ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail_poster);
@@ -91,15 +95,32 @@ public class DetailFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Yeah... I'll try to remember that one", Toast.LENGTH_SHORT).show();
+                details.favorite = !details.favorite;
+                Toast.makeText(getContext(), details.favorite ? "No way! I love that movie too" : "Eh, I wasn't super \"into\" it", Toast.LENGTH_SHORT).show();
+                styleFavoriteButton((Button) v);
             }
         });
+        styleFavoriteButton(button);
+    }
+
+    private void styleFavoriteButton(Button button) {
+        if (details.favorite) {
+            button.setBackgroundColor(getResources().getColor(android.R.color.holo_orange_light));
+        } else {
+            button.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(DETAILS_KEY, details);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        favorites.setFavorite(details.id, details.favorite);
     }
 
     public DetailHolder getDetails() {
@@ -112,31 +133,37 @@ public class DetailFragment extends Fragment {
     }
 
     public static class DetailHolder implements Parcelable {
+        private static final String ID_KEY = "id";
         private static final String TITLE_KEY = "title";
         private static final String IMAGE_KEY = "image";
         private static final String YEAR_KEY = "year";
         private static final String RUNTIME_KEY = "runtime";
         private static final String RATING_KEY = "rating";
         private static final String DESCRIPTION_KEY = "description";
+        private static final String FAVORITE_KEY = "favorite";
 
+        String id;
         String title;
         String image;
         String year;
         String runtime;
         String rating;
         String description;
+        boolean favorite;
 
         public DetailHolder() {
         }
 
         protected DetailHolder(Parcel in) {
-            @SuppressWarnings("unchecked") Map<String, String> map = in.readHashMap(ClassLoader.getSystemClassLoader());
-            title = map.get(TITLE_KEY);
-            image = map.get(IMAGE_KEY);
-            year = map.get(YEAR_KEY);
-            runtime = map.get(RUNTIME_KEY);
-            rating = map.get(RATING_KEY);
-            description = map.get(DESCRIPTION_KEY);
+            Bundle bundle = in.readBundle();
+            id = bundle.getString(ID_KEY);
+            title = bundle.getString(TITLE_KEY);
+            image = bundle.getString(IMAGE_KEY);
+            year = bundle.getString(YEAR_KEY);
+            runtime = bundle.getString(RUNTIME_KEY);
+            rating = bundle.getString(RATING_KEY);
+            description = bundle.getString(DESCRIPTION_KEY);
+            favorite = bundle.getBoolean(FAVORITE_KEY);
         }
 
         public static final Creator<DetailHolder> CREATOR = new Creator<DetailHolder>() {
@@ -158,15 +185,17 @@ public class DetailFragment extends Fragment {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            Map<String, String> map = new HashMap<>();
-            map.put(TITLE_KEY, title);
-            map.put(IMAGE_KEY, image);
-            map.put(YEAR_KEY, year);
-            map.put(RUNTIME_KEY, runtime);
-            map.put(RATING_KEY, rating);
-            map.put(DESCRIPTION_KEY, description);
+            Bundle bundle = new Bundle();
+            bundle.putString(ID_KEY, id);
+            bundle.putString(TITLE_KEY, id);
+            bundle.putString(IMAGE_KEY, image);
+            bundle.putString(YEAR_KEY, year);
+            bundle.putString(RUNTIME_KEY, runtime);
+            bundle.putString(RATING_KEY, rating);
+            bundle.putString(DESCRIPTION_KEY, description);
+            bundle.putBoolean(FAVORITE_KEY, favorite);
 
-            dest.writeMap(map);
+            dest.writeBundle(bundle);
         }
     }
 }

@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 
 import com.squareup.okhttp.OkHttpClient;
@@ -22,9 +23,9 @@ import java.util.List;
 /**
  * @author Ben Teichman
  */
-public class MovieUpdateTask extends AsyncTask<String, Void, String> {
+public abstract class MovieUpdateTask extends AsyncTask<String, Void, List<MovieHolder>> {
 
-    private static final String BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
+    protected static final String BASE_URL = "http://api.themoviedb.org/3";
 
     private ProgressDialog progress;
     private Context context;
@@ -40,61 +41,57 @@ public class MovieUpdateTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPreExecute() {
         progress = new ProgressDialog(context);
-        progress.setMessage("Loading Movies");
+        progress.setMessage(context.getResources().getString(loadingMessage()));
         progress.setIndeterminate(true);
         progress.setCancelable(false);
         progress.show();
     }
 
     @Override
-    protected String doInBackground(String... params) {
-        Uri uri = Uri.parse(BASE_URL).buildUpon()
-                .appendQueryParameter("sort_by", params[0])
-                .appendQueryParameter("api_key", API.KEY)
-                .build();
+    protected void onPostExecute(List<MovieHolder> result) {
+        if (result != null) {
+            adapter.clear();
+            //noinspection unchecked
+            adapter.addAll(result);
+        }
+        if (progress.isShowing()) {
+            progress.dismiss();
+        }
+    }
+
+    protected String makeRequest(Uri uri) {
+        uri = uri.buildUpon().appendQueryParameter("api_key", API.KEY).build();
 
         Request req = new Request.Builder()
                 .url(uri.toString())
                 .build();
 
-        String json = null;
+        String result = null;
         try {
             Response res = client.newCall(req).execute();
-            json = res.body().string();
+            result = res.body().string();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(getClass().getSimpleName(), "call to the movie db failed", e);
         }
-        return json;
+        return result;
     }
 
-    @Override
-    protected void onPostExecute(String result) {
-        try {
-            if (result != null) {
-                adapter.clear();
-                adapter.addAll(parseJson(result));
-            }
-            if (progress.isShowing()) {
-                progress.dismiss();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private List<MovieHolder> parseJson(String json) throws JSONException {
+    protected List<MovieHolder> parseJson(String json, String resultsKey) throws JSONException {
         List<MovieHolder> holders = new ArrayList<>();
 
         JSONObject response = new JSONObject(json);
-        JSONArray results = response.getJSONArray("results");
+        JSONArray results = response.getJSONArray(resultsKey);
         for (int i = 0; i < results.length(); i++) {
             JSONObject result = results.getJSONObject(i);
             MovieHolder holder = new MovieHolder();
             holder.id = result.getString("id");
             holder.image = result.getString("poster_path");
+            holder.title = result.getString("title");
             holders.add(holder);
         }
 
         return holders;
     }
+
+    protected abstract int loadingMessage();
 }
