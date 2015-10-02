@@ -3,13 +3,13 @@ package com.tkstr.movies;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -49,6 +49,7 @@ public class DetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View v = inflater.inflate(R.layout.fragment_detail, container, false);
 
         ListView trailerList = (ListView) v.findViewById(R.id.trailer_list);
@@ -91,23 +92,23 @@ public class DetailFragment extends Fragment {
                 .error(android.R.drawable.ic_dialog_alert)
                 .into(thumbnail);
 
-        Button button = (Button) view.findViewById(R.id.favourite);
+        FloatingActionButton button = (FloatingActionButton) view.findViewById(R.id.favorite);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 details.favorite = !details.favorite;
                 Toast.makeText(getContext(), details.favorite ? "No way! I love that movie too" : "Eh, I wasn't super \"into\" it", Toast.LENGTH_SHORT).show();
-                styleFavoriteButton((Button) v);
+                styleFavoriteButton((FloatingActionButton) v);
             }
         });
         styleFavoriteButton(button);
     }
 
-    private void styleFavoriteButton(Button button) {
+    private void styleFavoriteButton(FloatingActionButton button) {
         if (details.favorite) {
-            button.setBackgroundColor(getResources().getColor(android.R.color.holo_orange_light));
+            button.setImageResource(R.drawable.ic_star_favorite);
         } else {
-            button.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
+            button.setImageResource(R.drawable.ic_star);
         }
     }
 
