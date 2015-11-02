@@ -17,15 +17,16 @@ import java.util.List;
  */
 public class FavoriteUpdateTask extends MovieUpdateTask {
 
-    private static final String URL_PATH = "/find";
+    private static final String LOG_TAG = FavoriteUpdateTask.class.getSimpleName();
+    private static final String URL_PATH = "/movie";
 
     public FavoriteUpdateTask(Context context, ArrayAdapter adapter) {
         super(context, adapter);
     }
 
     @Override
-    protected int loadingMessage() {
-        return R.string.loading_favorites;
+    protected String loadingMessage() {
+        return context.getString(R.string.loading_favorites);
     }
 
     @Override
@@ -34,11 +35,12 @@ public class FavoriteUpdateTask extends MovieUpdateTask {
 
         List<MovieHolder> movies = new ArrayList<>();
         for (String id : params) {
+            Log.d(LOG_TAG, "recalling favorite with id: " + id);
             String json = makeRequest(baseUri.buildUpon().appendPath(id).build());
             try {
-                movies.addAll(parseJson(json, "movie_results"));
+                movies.add(parseMovie(json));
             } catch (JSONException e) {
-                Log.e(getClass().getSimpleName(), "unable to parse response", e);
+                Log.e(LOG_TAG, "unable to parse response: " + json, e);
             }
         }
         return movies;

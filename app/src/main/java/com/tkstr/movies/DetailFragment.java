@@ -62,7 +62,7 @@ public class DetailFragment extends Fragment {
             String id = getActivity().getIntent().getStringExtra(ID_KEY);
             String title = getActivity().getIntent().getStringExtra(TITLE_KEY);
             Log.d(LOG_KEY, "loading details for : " + title);
-            new DetailsTask(this, v, title).execute(id);
+            new DetailTask(this, v, title).execute(id);
         } else {
             fillDetails(v);
         }
@@ -97,7 +97,7 @@ public class DetailFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 details.favorite = !details.favorite;
-                Toast.makeText(getContext(), details.favorite ? "No way! I love that movie too" : "Eh, I wasn't super \"into\" it", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), details.favorite ? getString(R.string.silly_like) : getString(R.string.silly_dislike), Toast.LENGTH_SHORT).show();
                 styleFavoriteButton((FloatingActionButton) v);
             }
         });

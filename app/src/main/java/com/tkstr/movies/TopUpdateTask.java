@@ -23,8 +23,8 @@ public class TopUpdateTask extends MovieUpdateTask {
     }
 
     @Override
-    protected int loadingMessage() {
-        return R.string.loading_movies;
+    protected String loadingMessage() {
+        return context.getString(R.string.loading_movies);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class TopUpdateTask extends MovieUpdateTask {
         List<MovieHolder> movies = null;
         try {
             String json = makeRequest(uri);
-            movies = parseJson(json, "results");
+            movies = parseMovies(json);
         } catch (JSONException e) {
             Log.e(getClass().getSimpleName(), "unable to parse response", e);
         }

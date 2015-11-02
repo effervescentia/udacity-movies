@@ -41,7 +41,9 @@ public class DiscoveryActivity extends AppCompatActivity {
 
     @Override
     public boolean onMenuOpened(int featureId, Menu menu) {
-        setSelection(menu);
+        if (menu != null) {
+            setSelection(menu);
+        }
         return super.onMenuOpened(featureId, menu);
     }
 
@@ -82,6 +84,9 @@ public class DiscoveryActivity extends AppCompatActivity {
                 break;
             case R.id.sort_favorites:
                 sort(SORT_FAVORITES, R.string.sorting_favorite);
+                break;
+            case R.id.action_reset:
+                fragment.clearFavorites();
                 break;
         }
 

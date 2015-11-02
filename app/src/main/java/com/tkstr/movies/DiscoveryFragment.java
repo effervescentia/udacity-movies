@@ -1,10 +1,12 @@
 package com.tkstr.movies;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.widget.Toast;
 import com.tkstr.movies.PosterAdapter.MovieHolder;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.widget.Toast.LENGTH_SHORT;
@@ -32,22 +35,21 @@ public class DiscoveryFragment extends Fragment {
     public static final String SORT_RATING = "vote_count.desc";
     public static final String SORT_FAVORITES = "favorites";
     public static final String MOVIES_KEY = "movies";
-    public static final String FAVORITES_KEY = "favorites";
     public static final String SORT_KEY = "sort";
 
     private PosterAdapter adapter;
     private ArrayList<MovieHolder> movies = new ArrayList<>();
-    private String[] favorites = new String[]{};
     private String sort = SORT_POPULARITY;
+    private FavoritePrefs favorites;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            movies = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
-            favorites = savedInstanceState.getStringArray(FAVORITES_KEY);
             sort = savedInstanceState.getString(SORT_KEY);
+            movies = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
         }
+        favorites = new FavoritePrefs(getContext());
     }
 
     @Override
@@ -82,7 +84,6 @@ public class DiscoveryFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(MOVIES_KEY, movies);
-        outState.putStringArray(FAVORITES_KEY, favorites);
         outState.putString(SORT_KEY, sort);
     }
 
@@ -99,7 +100,8 @@ public class DiscoveryFragment extends Fragment {
         if (hasNetworkAccess()) {
             if (SORT_FAVORITES.equals(sort)) {
                 Log.d(getClass().getSimpleName(), "restoring movie list from favorites");
-                new FavoriteUpdateTask(getContext(), adapter).execute(favorites);
+                Set<String> movieIds = this.favorites.getFavorites();
+                new FavoriteUpdateTask(getContext(), adapter).execute(movieIds.toArray(new String[movieIds.size()]));
             } else {
                 Log.d(getClass().getSimpleName(), "reloading movie list with sort: " + sort);
                 new TopUpdateTask(getContext(), adapter).execute(sort);
@@ -107,6 +109,20 @@ public class DiscoveryFragment extends Fragment {
         } else {
             Toast.makeText(getContext(), "Unable to connect to network", LENGTH_SHORT).show();
         }
+    }
+
+    public void clearFavorites() {
+        new AlertDialog.Builder(getContext())
+                .setMessage(R.string.silly_forget)
+                .setPositiveButton(R.string.action_forget, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        favorites.resetFavorites();
+                        reload();
+                    }
+                })
+                .setNegativeButton(R.string.action_cancel, null)
+                .create().show();
     }
 
     private boolean hasNetworkAccess() {

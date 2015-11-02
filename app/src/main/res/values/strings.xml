@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Movies</string>
-    <string name="action_sort">Sort</string>
     <string name="popularity">Popularity</string>
     <string name="rating">Rating</string>
     <string name="favorites">Favorites</string>
@@ -8,13 +7,27 @@
     <string name="favourite_me">mark as favourite</string>
     <string name="thumbnail_desc">movie poster thumbnail</string>
 
+    <!-- actions -->
+    <string name="action_sort">Sort</string>
+    <string name="action_reset">Reset Favorites</string>
+    <string name="action_forget">Forget \'em</string>
+    <string name="action_cancel">Cancel</string>
+
+    <!-- warnings -->
+    <string name="no_network">No network connection available</string>
+
     <!-- loading messages -->
     <string name="loading_movies">Loading movies</string>
     <string name="loading_favorites">Loading favorites</string>
-    <string name="loading_details">Loading details for </string>
+    <string name="loading_details">Loading details for</string>
 
     <!-- sorting messages -->
     <string name="sorting_popularity">Sorting movies by popularity</string>
     <string name="sorting_rating">Sorting movies by rating</string>
     <string name="sorting_favorite">Recalling favorite movies</string>
+
+    <!-- silly messages -->
+    <string name="silly_like">No way! I love that movie too!</string>
+    <string name="silly_dislike">Eh, I wasn\'t super "into" it…</string>
+    <string name="silly_forget">You REALLY want to forget about your favorite movies?</string>
 </resources>
