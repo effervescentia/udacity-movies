@@ -5,9 +5,13 @@ import android.util.Log;
 import android.view.View;
 
 import com.tkstr.movies.DetailFragment.DetailHolder;
+import com.tkstr.movies.DetailFragment.TrailerHolder;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * @author Ben Teichman
@@ -77,15 +81,27 @@ public class DetailTask extends NetworkTask<DetailHolder> {
     private DetailHolder parseJson(String movieJson, String videosJson, String reviewsJson) throws JSONException {
         DetailHolder holder = new DetailHolder();
 
-        JSONObject response = new JSONObject(movieJson);
-        holder.id = response.getString("id");
-        holder.title = response.getString("title");
-        holder.image = response.getString("poster_path");
-        holder.year = response.getString("release_date").split("-", 2)[0];
-        holder.rating = response.getString("vote_average") + "/10";
-        holder.runtime = response.getString("runtime") + "min";
-        holder.description = response.getString("overview");
+        JSONObject movie = new JSONObject(movieJson);
+        holder.id = movie.getString("id");
+        holder.title = movie.getString("title");
+        holder.image = movie.getString("poster_path");
+        holder.year = movie.getString("release_date").split("-", 2)[0];
+        holder.rating = movie.getString("vote_average") + "/10";
+        holder.runtime = movie.getString("runtime") + "min";
+        holder.description = movie.getString("overview");
         holder.favorite = favorites.isFavorite(holder.id);
+
+        JSONArray trailers = new JSONObject(videosJson).getJSONArray("results");
+
+        holder.trailers = new ArrayList<>();
+        for (int i = 0; i < trailers.length(); i++) {
+            JSONObject trailer = trailers.getJSONObject(i);
+
+            TrailerHolder trailerHolder = new TrailerHolder();
+            trailerHolder.key = trailer.getString("key");
+            trailerHolder.name = trailer.getString("name");
+            holder.trailers.add(trailerHolder);
+        }
 
         return holder;
     }

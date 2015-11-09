@@ -1,5 +1,7 @@
 package com.tkstr.movies;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -9,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -33,6 +36,7 @@ public class DetailFragment extends Fragment {
 
     private DetailHolder details;
     private FavoritePrefs favorites;
+    private TrailerAdapter trailerAdapter;
 
     public DetailFragment() {
     }
@@ -102,6 +106,18 @@ public class DetailFragment extends Fragment {
             }
         });
         styleFavoriteButton(button);
+
+        ListView trailerList = (ListView) view.findViewById(R.id.trailer_list);
+        trailerAdapter = new TrailerAdapter(getContext(), details.trailers);
+        trailerList.setAdapter(trailerAdapter);
+
+        trailerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TrailerHolder holder = trailerAdapter.getItem(position - 1);
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://youtube.com/watch?v=" + holder.key)));
+            }
+        });
     }
 
     private void styleFavoriteButton(FloatingActionButton button) {
@@ -142,6 +158,7 @@ public class DetailFragment extends Fragment {
         private static final String RATING_KEY = "rating";
         private static final String DESCRIPTION_KEY = "description";
         private static final String FAVORITE_KEY = "favorite";
+        private static final String TRAILERS_KEY = "trailers";
 
         String id;
         String title;
@@ -151,6 +168,7 @@ public class DetailFragment extends Fragment {
         String rating;
         String description;
         boolean favorite;
+        ArrayList<TrailerHolder> trailers;
 
         public DetailHolder() {
         }
@@ -165,6 +183,7 @@ public class DetailFragment extends Fragment {
             rating = bundle.getString(RATING_KEY);
             description = bundle.getString(DESCRIPTION_KEY);
             favorite = bundle.getBoolean(FAVORITE_KEY);
+            trailers = bundle.getParcelableArrayList(TRAILERS_KEY);
         }
 
         public static final Creator<DetailHolder> CREATOR = new Creator<DetailHolder>() {
@@ -195,6 +214,51 @@ public class DetailFragment extends Fragment {
             bundle.putString(RATING_KEY, rating);
             bundle.putString(DESCRIPTION_KEY, description);
             bundle.putBoolean(FAVORITE_KEY, favorite);
+            bundle.putParcelableArrayList(TRAILERS_KEY, trailers);
+
+            dest.writeBundle(bundle);
+        }
+    }
+
+    public static class TrailerHolder implements Parcelable {
+
+        private static final String KEY_KEY = "key";
+        private static final String NAME_KEY = "name";
+
+        String key;
+        String name;
+
+        public TrailerHolder() {
+        }
+
+        public TrailerHolder(Parcel in) {
+            Bundle bundle = in.readBundle();
+            key = bundle.getString(KEY_KEY);
+            name = bundle.getString(NAME_KEY);
+        }
+
+        public static final Creator<TrailerHolder> CREATOR = new Creator<TrailerHolder>() {
+            @Override
+            public TrailerHolder createFromParcel(Parcel in) {
+                return new TrailerHolder(in);
+            }
+
+            @Override
+            public TrailerHolder[] newArray(int size) {
+                return new TrailerHolder[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            Bundle bundle = new Bundle();
+            bundle.putString(KEY_KEY, key);
+            bundle.putString(NAME_KEY, name);
 
             dest.writeBundle(bundle);
         }
