@@ -110,7 +110,7 @@ public class ComboAdapter extends ArrayAdapter<Object> {
 
     private void fillReview(LinearLayout item, ReviewHolder review) {
         TextView author = (TextView) item.findViewById(R.id.review_author);
-        author.setText("- " + review.author);
+        author.setText(String.format("- %s", review.author));
 
         TextView content = (TextView) item.findViewById(R.id.review_content);
         content.setText(review.content);

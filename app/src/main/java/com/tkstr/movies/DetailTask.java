@@ -88,7 +88,7 @@ public class DetailTask extends NetworkTask<DetailHolder> {
             JSONObject trailer = trailers.getJSONObject(i);
 
             TrailerHolder trailerHolder = new TrailerHolder();
-            trailerHolder.id = trailer.getString("source");
+            trailerHolder.url = "http://youtube.com/watch?v=" + trailer.getString("source");
             trailerHolder.name = trailer.getString("name");
             holder.trailers.add(trailerHolder);
         }
@@ -107,6 +107,4 @@ public class DetailTask extends NetworkTask<DetailHolder> {
 
         return holder;
     }
-
-
 }

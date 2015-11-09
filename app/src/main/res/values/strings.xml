@@ -14,6 +14,7 @@
     <string name="action_reset">Reset Favorites</string>
     <string name="action_forget">Forget \'em</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_share">Share</string>
 
     <!-- warnings -->
     <string name="no_network">No network connection available</string>

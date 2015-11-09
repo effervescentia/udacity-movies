@@ -7,6 +7,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,7 @@ public class DetailFragment extends Fragment {
     private DetailHolder details;
     private FavoritePrefs favorites;
     private ComboAdapter comboAdapter;
+    private ShareActionProvider shareActionProvider;
 
     public DetailFragment() {
     }
@@ -106,17 +108,27 @@ public class DetailFragment extends Fragment {
         ListView comboList = (ListView) view.findViewById(R.id.combo_list);
         comboAdapter = new ComboAdapter(getContext(), details.trailers, details.reviews);
 
+        if (details.trailers != null && details.trailers.size() > 0) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, details.trailers.get(0).url);
+            intent.setType("text/plain");
+            shareActionProvider.setShareIntent(intent);
+        }
+
         comboList.setAdapter(comboAdapter);
 
         comboList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                position--; //to account for header?
+                if (position > 0) {
+                    position--; //to account for header
 
-                int itemType = comboAdapter.getItemViewType(position);
-                if (itemType == ComboAdapter.TRAILER_TYPE) {
-                    TrailerHolder holder = (TrailerHolder) comboAdapter.getItem(position);
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://youtube.com/watch?v=" + holder.id)));
+                    int itemType = comboAdapter.getItemViewType(position);
+                    if (itemType == ComboAdapter.TRAILER_TYPE) {
+                        TrailerHolder holder = (TrailerHolder) comboAdapter.getItem(position);
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(holder.url)));
+                    }
                 }
             }
         });
@@ -149,6 +161,14 @@ public class DetailFragment extends Fragment {
     public DetailFragment setDetails(DetailHolder details) {
         this.details = details;
         return this;
+    }
+
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
+    }
+
+    public void setShareActionProvider(ShareActionProvider shareActionProvider) {
+        this.shareActionProvider = shareActionProvider;
     }
 
     public static class DetailHolder implements Parcelable {
@@ -231,19 +251,19 @@ public class DetailFragment extends Fragment {
 
     public static class TrailerHolder extends MetadataHolder {
 
-        private static final String ID_KEY = "id";
         private static final String NAME_KEY = "name";
+        private static final String URL_KEY = "url";
 
-        String id;
         String name;
+        String url;
 
         public TrailerHolder() {
         }
 
         public TrailerHolder(Parcel in) {
             Bundle bundle = in.readBundle();
-            id = bundle.getString(ID_KEY);
             name = bundle.getString(NAME_KEY);
+            url = bundle.getString(URL_KEY);
         }
 
         public static final Creator<TrailerHolder> CREATOR = new Creator<TrailerHolder>() {
@@ -266,8 +286,8 @@ public class DetailFragment extends Fragment {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             Bundle bundle = new Bundle();
-            bundle.putString(ID_KEY, id);
             bundle.putString(NAME_KEY, name);
+            bundle.putString(URL_KEY, url);
 
             dest.writeBundle(bundle);
         }
