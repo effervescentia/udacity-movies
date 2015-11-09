@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.tkstr.movies.DetailFragment.DetailHolder;
+import com.tkstr.movies.DetailFragment.ReviewHolder;
 import com.tkstr.movies.DetailFragment.TrailerHolder;
 
 import org.json.JSONArray;
@@ -20,8 +21,8 @@ public class DetailTask extends NetworkTask<DetailHolder> {
 
     private static final String LOG_TAG = DetailTask.class.getSimpleName();
     private static final String FIND_PATH = "/movie";
-    private static final String VIDEOS_PATH = "videos";
-    private static final String REVIEWS_PATH = "reviews";
+    private static final String TRAILERS = "trailers";
+    private static final String REVIEWS = "reviews";
 
     private DetailFragment fragment;
     private View view;
@@ -40,25 +41,14 @@ public class DetailTask extends NetworkTask<DetailHolder> {
     protected DetailHolder doInBackground(String... params) {
         Uri baseUri = Uri.parse(BASE_URL + FIND_PATH).buildUpon()
                 .appendPath(params[0])
-                .build();
-
-        Uri videosUri = baseUri.buildUpon()
-                .appendPath(VIDEOS_PATH)
-                .build();
-
-        Uri reviewsUri = baseUri.buildUpon()
-                .appendPath(REVIEWS_PATH)
+                .appendQueryParameter("append_to_response", TRAILERS + "," + REVIEWS)
                 .build();
 
         DetailHolder details = null;
         try {
             String detailsJson = makeRequest(baseUri);
             Log.d(LOG_TAG, "details: " + detailsJson);
-            String videosJson = makeRequest(videosUri);
-            Log.d(LOG_TAG, "videos: " + videosJson);
-            String reviewsJson = makeRequest(reviewsUri);
-            Log.d(LOG_TAG, "reviews: " + reviewsJson);
-            details = parseJson(detailsJson, videosJson, reviewsJson);
+            details = parseJson(detailsJson);
         } catch (JSONException e) {
             Log.e(LOG_TAG, "unable to parse response", e);
         }
@@ -78,7 +68,7 @@ public class DetailTask extends NetworkTask<DetailHolder> {
         return fragment.getResources().getString(R.string.loading_details) + " " + title;
     }
 
-    private DetailHolder parseJson(String movieJson, String videosJson, String reviewsJson) throws JSONException {
+    private DetailHolder parseJson(String movieJson) throws JSONException {
         DetailHolder holder = new DetailHolder();
 
         JSONObject movie = new JSONObject(movieJson);
@@ -91,16 +81,28 @@ public class DetailTask extends NetworkTask<DetailHolder> {
         holder.description = movie.getString("overview");
         holder.favorite = favorites.isFavorite(holder.id);
 
-        JSONArray trailers = new JSONObject(videosJson).getJSONArray("results");
+        JSONArray trailers = movie.getJSONObject(TRAILERS).getJSONArray("youtube");
 
         holder.trailers = new ArrayList<>();
         for (int i = 0; i < trailers.length(); i++) {
             JSONObject trailer = trailers.getJSONObject(i);
 
             TrailerHolder trailerHolder = new TrailerHolder();
-            trailerHolder.key = trailer.getString("key");
+            trailerHolder.id = trailer.getString("source");
             trailerHolder.name = trailer.getString("name");
             holder.trailers.add(trailerHolder);
+        }
+
+        JSONArray reviews = movie.getJSONObject(REVIEWS).getJSONArray("results");
+
+        holder.reviews = new ArrayList<>();
+        for (int i = 0; i < reviews.length(); i++) {
+            JSONObject review = reviews.getJSONObject(i);
+
+            ReviewHolder reviewHolder = new ReviewHolder();
+            reviewHolder.author = review.getString("author");
+            reviewHolder.content = review.getString("content");
+            holder.reviews.add(reviewHolder);
         }
 
         return holder;

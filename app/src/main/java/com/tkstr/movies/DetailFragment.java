@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -21,7 +20,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * @author Ben Teichman
@@ -36,7 +34,7 @@ public class DetailFragment extends Fragment {
 
     private DetailHolder details;
     private FavoritePrefs favorites;
-    private TrailerAdapter trailerAdapter;
+    private ComboAdapter comboAdapter;
 
     public DetailFragment() {
     }
@@ -56,11 +54,9 @@ public class DetailFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        ListView trailerList = (ListView) v.findViewById(R.id.trailer_list);
+        ListView comboList = (ListView) v.findViewById(R.id.combo_list);
 
-        trailerList.addHeaderView(inflater.inflate(R.layout.header_detail, null));
-
-        trailerList.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, new ArrayList<>(Collections.<String>emptyList())));
+        comboList.addHeaderView(inflater.inflate(R.layout.header_detail, comboList, false));
 
         if (details == null) {
             String id = getActivity().getIntent().getStringExtra(ID_KEY);
@@ -107,15 +103,21 @@ public class DetailFragment extends Fragment {
         });
         styleFavoriteButton(button);
 
-        ListView trailerList = (ListView) view.findViewById(R.id.trailer_list);
-        trailerAdapter = new TrailerAdapter(getContext(), details.trailers);
-        trailerList.setAdapter(trailerAdapter);
+        ListView comboList = (ListView) view.findViewById(R.id.combo_list);
+        comboAdapter = new ComboAdapter(getContext(), details.trailers, details.reviews);
 
-        trailerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        comboList.setAdapter(comboAdapter);
+
+        comboList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TrailerHolder holder = trailerAdapter.getItem(position - 1);
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://youtube.com/watch?v=" + holder.key)));
+                position--; //to account for header?
+
+                int itemType = comboAdapter.getItemViewType(position);
+                if (itemType == ComboAdapter.TRAILER_TYPE) {
+                    TrailerHolder holder = (TrailerHolder) comboAdapter.getItem(position);
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://youtube.com/watch?v=" + holder.id)));
+                }
             }
         });
     }
@@ -159,6 +161,7 @@ public class DetailFragment extends Fragment {
         private static final String DESCRIPTION_KEY = "description";
         private static final String FAVORITE_KEY = "favorite";
         private static final String TRAILERS_KEY = "trailers";
+        private static final String REVIEWS_KEY = "reviews";
 
         String id;
         String title;
@@ -169,6 +172,7 @@ public class DetailFragment extends Fragment {
         String description;
         boolean favorite;
         ArrayList<TrailerHolder> trailers;
+        ArrayList<ReviewHolder> reviews;
 
         public DetailHolder() {
         }
@@ -184,6 +188,7 @@ public class DetailFragment extends Fragment {
             description = bundle.getString(DESCRIPTION_KEY);
             favorite = bundle.getBoolean(FAVORITE_KEY);
             trailers = bundle.getParcelableArrayList(TRAILERS_KEY);
+            reviews = bundle.getParcelableArrayList(REVIEWS_KEY);
         }
 
         public static final Creator<DetailHolder> CREATOR = new Creator<DetailHolder>() {
@@ -215,17 +220,21 @@ public class DetailFragment extends Fragment {
             bundle.putString(DESCRIPTION_KEY, description);
             bundle.putBoolean(FAVORITE_KEY, favorite);
             bundle.putParcelableArrayList(TRAILERS_KEY, trailers);
+            bundle.putParcelableArrayList(REVIEWS_KEY, reviews);
 
             dest.writeBundle(bundle);
         }
     }
 
-    public static class TrailerHolder implements Parcelable {
+    public abstract static class MetadataHolder implements Parcelable {
+    }
 
-        private static final String KEY_KEY = "key";
+    public static class TrailerHolder extends MetadataHolder {
+
+        private static final String ID_KEY = "id";
         private static final String NAME_KEY = "name";
 
-        String key;
+        String id;
         String name;
 
         public TrailerHolder() {
@@ -233,7 +242,7 @@ public class DetailFragment extends Fragment {
 
         public TrailerHolder(Parcel in) {
             Bundle bundle = in.readBundle();
-            key = bundle.getString(KEY_KEY);
+            id = bundle.getString(ID_KEY);
             name = bundle.getString(NAME_KEY);
         }
 
@@ -257,8 +266,52 @@ public class DetailFragment extends Fragment {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             Bundle bundle = new Bundle();
-            bundle.putString(KEY_KEY, key);
+            bundle.putString(ID_KEY, id);
             bundle.putString(NAME_KEY, name);
+
+            dest.writeBundle(bundle);
+        }
+    }
+
+    public static class ReviewHolder extends MetadataHolder {
+
+        private static final String AUTHOR_KEY = "author";
+        private static final String CONTENT_KEY = "content";
+
+        String author;
+        String content;
+
+        public ReviewHolder() {
+        }
+
+        public ReviewHolder(Parcel in) {
+            Bundle bundle = in.readBundle();
+            author = bundle.getString(AUTHOR_KEY);
+            content = bundle.getString(CONTENT_KEY);
+        }
+
+        public static final Creator<ReviewHolder> CREATOR = new Creator<ReviewHolder>() {
+            @Override
+            public ReviewHolder createFromParcel(Parcel in) {
+                return new ReviewHolder(in);
+            }
+
+            @Override
+            public ReviewHolder[] newArray(int size) {
+                return new ReviewHolder[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            Bundle bundle = new Bundle();
+            bundle.putString(AUTHOR_KEY, author);
+            bundle.putString(CONTENT_KEY, content);
 
             dest.writeBundle(bundle);
         }

@@ -2,6 +2,8 @@
     <string name="app_name">Movies</string>
     <string name="popularity">Popularity</string>
     <string name="rating">Rating</string>
+    <string name="trailers">Trailers</string>
+    <string name="reviews">Reviews</string>
     <string name="favorites">Favorites</string>
     <string name="title_activity_detail">Movie Details</string>
     <string name="favourite_me">mark as favourite</string>
