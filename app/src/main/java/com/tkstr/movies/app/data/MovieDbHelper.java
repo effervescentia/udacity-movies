@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.tkstr.movies.app.data.MovieContract.DetailEntry;
+import com.tkstr.movies.app.data.MovieContract.SimpleEntry;
 
 /**
  * @author Ben Teichman
@@ -21,6 +22,9 @@ public class MovieDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         createDetailsTable(db);
+        createMovieTable(db, SimpleEntry.TOP_RATED_TABLE_NAME);
+        createMovieTable(db, SimpleEntry.POPULAR_TABLE_NAME);
+        createMovieTable(db, SimpleEntry.FAVORITES_TABLE_NAME);
     }
 
     private void createDetailsTable(SQLiteDatabase database) {
@@ -42,6 +46,17 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 " UNIQUE (" + DetailEntry.COLUMN_ID + ") ON CONFLICT REPLACE );";
 
         database.execSQL(SQL_CREATE_DETAILS_TABLE);
+    }
+
+    private void createMovieTable(SQLiteDatabase database, String tableName) {
+        final String SQL_CREATE_TABLE = "CREATE TABLE " + tableName + " (" +
+                SimpleEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+
+                SimpleEntry.COLUMN_ID + " LONG NOT NULL," +
+                SimpleEntry.COLUMN_NAME + " TEXT NON NULL," +
+                SimpleEntry.COLUMN_IMAGE + " TEXT NON NULL);";
+
+        database.execSQL(SQL_CREATE_TABLE);
     }
 
     @Override
