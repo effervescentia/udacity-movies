@@ -1,11 +1,11 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
-import com.tkstr.movies.PosterAdapter.MovieHolder;
+import com.tkstr.movies.R;
 
 import org.json.JSONException;
 
@@ -30,10 +30,10 @@ public class FavoriteUpdateTask extends MovieUpdateTask {
     }
 
     @Override
-    protected List<MovieHolder> doInBackground(String... params) {
+    protected List<PosterAdapter.MovieHolder> doInBackground(String... params) {
         Uri baseUri = Uri.parse(BASE_URL + URL_PATH);
 
-        List<MovieHolder> movies = new ArrayList<>();
+        List<PosterAdapter.MovieHolder> movies = new ArrayList<>();
         for (String id : params) {
             Log.d(LOG_TAG, "recalling favorite with id: " + id);
             String json = makeRequest(baseUri.buildUpon().appendPath(id).build());

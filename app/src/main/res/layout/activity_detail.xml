@@ -1,15 +1,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/detail_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.tkstr.movies.DetailActivity"
+    tools:context="com.tkstr.movies.app.DetailActivity"
     tools:ignore="MergeRootFrame">
 
     <fragment
-        android:id="@+id/detail_frag"
-        class="com.tkstr.movies.DetailFragment"
+        android:id="@+id/detail_fragment"
+        class="com.tkstr.movies.app.DetailFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_detail" />
 
 </FrameLayout>

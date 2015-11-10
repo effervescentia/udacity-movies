@@ -1,12 +1,12 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.net.Uri;
 import android.util.Log;
-import android.view.View;
 
-import com.tkstr.movies.DetailFragment.DetailHolder;
-import com.tkstr.movies.DetailFragment.ReviewHolder;
-import com.tkstr.movies.DetailFragment.TrailerHolder;
+import com.tkstr.movies.R;
+import com.tkstr.movies.app.DetailFragment.DetailHolder;
+import com.tkstr.movies.app.DetailFragment.ReviewHolder;
+import com.tkstr.movies.app.DetailFragment.TrailerHolder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,14 +25,12 @@ public class DetailTask extends NetworkTask<DetailHolder> {
     private static final String REVIEWS = "reviews";
 
     private DetailFragment fragment;
-    private View view;
     private String title;
     private FavoritePrefs favorites;
 
-    public DetailTask(DetailFragment fragment, View view, String title) {
+    public DetailTask(DetailFragment fragment, String title) {
         super(fragment.getContext());
         this.fragment = fragment;
-        this.view = view;
         this.title = title;
         favorites = new FavoritePrefs(fragment.getActivity());
     }
@@ -72,14 +70,14 @@ public class DetailTask extends NetworkTask<DetailHolder> {
         DetailHolder holder = new DetailHolder();
 
         JSONObject movie = new JSONObject(movieJson);
-        holder.id = movie.getString("id");
+        holder.id = movie.getLong("id");
         holder.title = movie.getString("title");
         holder.image = movie.getString("poster_path");
-        holder.year = movie.getString("release_date").split("-", 2)[0];
-        holder.rating = movie.getString("vote_average") + "/10";
-        holder.runtime = movie.getString("runtime") + "min";
+        holder.year = Integer.parseInt(movie.getString("release_date").split("-", 2)[0]);
+        holder.rating = movie.getDouble("vote_average");
+        holder.runtime = movie.getInt("runtime");
         holder.description = movie.getString("overview");
-        holder.favorite = favorites.isFavorite(holder.id);
+        holder.favorite = favorites.isFavorite(String.valueOf(holder.id));
 
         JSONArray trailers = movie.getJSONObject(TRAILERS).getJSONArray("youtube");
 

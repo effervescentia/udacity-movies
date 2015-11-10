@@ -1,4 +1,4 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.content.Context;
 import android.os.Parcel;

@@ -1,4 +1,4 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.tkstr.movies.PosterAdapter.MovieHolder;
+import com.tkstr.movies.R;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -37,7 +37,7 @@ public class DiscoveryFragment extends Fragment {
 
     private PosterAdapter adapter;
     private GridView grid;
-    private ArrayList<MovieHolder> movies = new ArrayList<>();
+    private ArrayList<PosterAdapter.MovieHolder> movies = new ArrayList<>();
     private String sort = SORT_POPULARITY;
     private FavoritePrefs favorites;
 

@@ -1,9 +1,7 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.content.Context;
 import android.widget.ArrayAdapter;
-
-import com.tkstr.movies.PosterAdapter.MovieHolder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,7 +13,7 @@ import java.util.List;
 /**
  * @author Ben Teichman
  */
-public abstract class MovieUpdateTask extends NetworkTask<List<MovieHolder>> {
+public abstract class MovieUpdateTask extends NetworkTask<List<PosterAdapter.MovieHolder>> {
 
     protected static final String BASE_URL = "http://api.themoviedb.org/3";
 
@@ -27,7 +25,7 @@ public abstract class MovieUpdateTask extends NetworkTask<List<MovieHolder>> {
     }
 
     @Override
-    protected void onPostExecute(List<MovieHolder> result) {
+    protected void onPostExecute(List<PosterAdapter.MovieHolder> result) {
         if (result != null) {
             adapter.clear();
             //noinspection unchecked
@@ -36,12 +34,12 @@ public abstract class MovieUpdateTask extends NetworkTask<List<MovieHolder>> {
         super.onPostExecute(result);
     }
 
-    protected MovieHolder parseMovie(String json) throws JSONException {
+    protected PosterAdapter.MovieHolder parseMovie(String json) throws JSONException {
         return extractMovie(new JSONObject(json));
     }
 
-    protected List<MovieHolder> parseMovies(String json) throws JSONException {
-        List<MovieHolder> holders = new ArrayList<>();
+    protected List<PosterAdapter.MovieHolder> parseMovies(String json) throws JSONException {
+        List<PosterAdapter.MovieHolder> holders = new ArrayList<>();
 
         JSONObject response = new JSONObject(json);
         JSONArray results = response.getJSONArray("results");
@@ -52,8 +50,8 @@ public abstract class MovieUpdateTask extends NetworkTask<List<MovieHolder>> {
         return holders;
     }
 
-    private MovieHolder extractMovie(JSONObject result) throws JSONException {
-        MovieHolder holder = new MovieHolder();
+    private PosterAdapter.MovieHolder extractMovie(JSONObject result) throws JSONException {
+        PosterAdapter.MovieHolder holder = new PosterAdapter.MovieHolder();
         holder.id = result.getString("id");
         holder.image = result.getString("poster_path");
         holder.title = result.getString("title");

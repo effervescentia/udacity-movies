@@ -1,4 +1,4 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.app.ProgressDialog;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.tkstr.movies.R;
 
 import java.util.ArrayList;
 
@@ -62,7 +63,7 @@ public class DetailFragment extends Fragment {
         inflater.inflate(R.menu.menu_detail, menu);
 
         MenuItem share = menu.findItem(R.id.action_share);
-        setShareActionProvider((ShareActionProvider) MenuItemCompat.getActionProvider(share));
+        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(share);
     }
 
     @Override
@@ -87,9 +88,9 @@ public class DetailFragment extends Fragment {
     }
 
     public void updateDetails(String id, String title) {
-        if (id != null && title != null) {
+        if (id != null && title != null && this.getContext() != null) {
             Log.d(LOG_KEY, "loading details for : " + title);
-            new DetailTask(this, fragmentView, title).execute(id);
+            new DetailTask(this, title).execute(id);
         }
     }
 
@@ -98,13 +99,13 @@ public class DetailFragment extends Fragment {
         title.setText(details.title);
 
         TextView year = (TextView) fragmentView.findViewById(R.id.year);
-        year.setText(details.year);
+        year.setText(String.valueOf(details.year));
 
         TextView length = (TextView) fragmentView.findViewById(R.id.length);
-        length.setText(details.runtime);
+        length.setText(String.format("%dmin", details.runtime));
 
         TextView rating = (TextView) fragmentView.findViewById(R.id.rating);
-        rating.setText(details.rating);
+        rating.setText(String.format("%.1f/10", details.rating));
 
         final TextView description = (TextView) fragmentView.findViewById(R.id.description);
         description.setText(details.description);
@@ -135,7 +136,10 @@ public class DetailFragment extends Fragment {
             intent.setAction(Intent.ACTION_SEND);
             intent.putExtra(Intent.EXTRA_TEXT, details.trailers.get(0).url);
             intent.setType("text/plain");
-            shareActionProvider.setShareIntent(intent);
+
+            if (shareActionProvider != null) {
+                shareActionProvider.setShareIntent(intent);
+            }
         }
 
         comboList.setAdapter(comboAdapter);
@@ -177,7 +181,9 @@ public class DetailFragment extends Fragment {
     }
 
     private void setFavorite() {
-        favorites.setFavorite(details.id, details.favorite);
+        if (details != null) {
+            favorites.setFavorite(String.valueOf(details.id), details.favorite);
+        }
     }
 
     public DetailHolder getDetails() {
@@ -187,14 +193,6 @@ public class DetailFragment extends Fragment {
     public DetailFragment setDetails(DetailHolder details) {
         this.details = details;
         return this;
-    }
-
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
-    }
-
-    public void setShareActionProvider(ShareActionProvider shareActionProvider) {
-        this.shareActionProvider = shareActionProvider;
     }
 
     public static class DetailHolder implements Parcelable {
@@ -209,12 +207,12 @@ public class DetailFragment extends Fragment {
         private static final String TRAILERS_KEY = "trailers";
         private static final String REVIEWS_KEY = "reviews";
 
-        String id;
+        long id;
         String title;
         String image;
-        String year;
-        String runtime;
-        String rating;
+        int year;
+        int runtime;
+        double rating;
         String description;
         boolean favorite;
         ArrayList<TrailerHolder> trailers;
@@ -225,12 +223,12 @@ public class DetailFragment extends Fragment {
 
         protected DetailHolder(Parcel in) {
             Bundle bundle = in.readBundle();
-            id = bundle.getString(ID_KEY);
+            id = bundle.getLong(ID_KEY);
             title = bundle.getString(TITLE_KEY);
             image = bundle.getString(IMAGE_KEY);
-            year = bundle.getString(YEAR_KEY);
-            runtime = bundle.getString(RUNTIME_KEY);
-            rating = bundle.getString(RATING_KEY);
+            year = bundle.getInt(YEAR_KEY);
+            runtime = bundle.getInt(RUNTIME_KEY);
+            rating = bundle.getDouble(RATING_KEY);
             description = bundle.getString(DESCRIPTION_KEY);
             favorite = bundle.getBoolean(FAVORITE_KEY);
             trailers = bundle.getParcelableArrayList(TRAILERS_KEY);
@@ -257,12 +255,12 @@ public class DetailFragment extends Fragment {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             Bundle bundle = new Bundle();
-            bundle.putString(ID_KEY, id);
-            bundle.putString(TITLE_KEY, id);
+            bundle.putLong(ID_KEY, id);
+            bundle.putString(TITLE_KEY, title);
             bundle.putString(IMAGE_KEY, image);
-            bundle.putString(YEAR_KEY, year);
-            bundle.putString(RUNTIME_KEY, runtime);
-            bundle.putString(RATING_KEY, rating);
+            bundle.putInt(YEAR_KEY, year);
+            bundle.putInt(RUNTIME_KEY, runtime);
+            bundle.putDouble(RATING_KEY, rating);
             bundle.putString(DESCRIPTION_KEY, description);
             bundle.putBoolean(FAVORITE_KEY, favorite);
             bundle.putParcelableArrayList(TRAILERS_KEY, trailers);

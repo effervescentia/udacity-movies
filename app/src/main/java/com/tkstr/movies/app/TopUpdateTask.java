@@ -1,11 +1,12 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
-import com.tkstr.movies.PosterAdapter.MovieHolder;
+import com.tkstr.movies.app.PosterAdapter.MovieHolder;
+import com.tkstr.movies.R;
 
 import org.json.JSONException;
 

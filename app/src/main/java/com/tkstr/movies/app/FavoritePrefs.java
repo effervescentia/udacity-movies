@@ -1,8 +1,10 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+
+import com.tkstr.movies.R;
 
 import java.util.HashSet;
 import java.util.Set;

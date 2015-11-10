@@ -1,4 +1,4 @@
-package com.tkstr.movies;
+package com.tkstr.movies.app;
 
 import android.content.Context;
 import android.util.Log;
@@ -9,8 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.tkstr.movies.DetailFragment.ReviewHolder;
-import com.tkstr.movies.DetailFragment.TrailerHolder;
+import com.tkstr.movies.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +25,11 @@ public class ComboAdapter extends ArrayAdapter<Object> {
     public static final int REVIEW_TYPE = 1;
     public static final int TITLE_TYPE = 2;
 
-    public ComboAdapter(Context context, List<TrailerHolder> trailers, List<ReviewHolder> reviews) {
+    public ComboAdapter(Context context, List<DetailFragment.TrailerHolder> trailers, List<DetailFragment.ReviewHolder> reviews) {
         super(context, -1, combine(context, trailers, reviews));
     }
 
-    private static ArrayList<Object> combine(Context context, List<TrailerHolder> trailers, List<ReviewHolder> reviews) {
+    private static ArrayList<Object> combine(Context context, List<DetailFragment.TrailerHolder> trailers, List<DetailFragment.ReviewHolder> reviews) {
         ArrayList<Object> combined = new ArrayList<>();
         if (trailers != null && trailers.size() > 0) {
             combined.add(context.getResources().getString(R.string.trailers));
@@ -51,9 +50,9 @@ public class ComboAdapter extends ArrayAdapter<Object> {
     @Override
     public int getItemViewType(int position) {
         Object item = getItem(position);
-        if (item instanceof TrailerHolder) {
+        if (item instanceof DetailFragment.TrailerHolder) {
             return TRAILER_TYPE;
-        } else if (item instanceof ReviewHolder) {
+        } else if (item instanceof DetailFragment.ReviewHolder) {
             return REVIEW_TYPE;
         } else {
             return TITLE_TYPE;
@@ -75,10 +74,10 @@ public class ComboAdapter extends ArrayAdapter<Object> {
 
         switch (itemType) {
             case TRAILER_TYPE:
-                fillTrailer(item, (TrailerHolder) getItem(position));
+                fillTrailer(item, (DetailFragment.TrailerHolder) getItem(position));
                 break;
             case REVIEW_TYPE:
-                fillReview(item, (ReviewHolder) getItem(position));
+                fillReview(item, (DetailFragment.ReviewHolder) getItem(position));
                 break;
             case TITLE_TYPE:
                 fillTitle(item, (String) getItem(position));
@@ -103,12 +102,12 @@ public class ComboAdapter extends ArrayAdapter<Object> {
         }
     }
 
-    private void fillTrailer(LinearLayout item, TrailerHolder trailer) {
+    private void fillTrailer(LinearLayout item, DetailFragment.TrailerHolder trailer) {
         TextView trailerTitle = (TextView) item.findViewById(R.id.trailer_title);
         trailerTitle.setText(trailer.name);
     }
 
-    private void fillReview(LinearLayout item, ReviewHolder review) {
+    private void fillReview(LinearLayout item, DetailFragment.ReviewHolder review) {
         TextView author = (TextView) item.findViewById(R.id.review_author);
         author.setText(String.format("- %s", review.author));
 

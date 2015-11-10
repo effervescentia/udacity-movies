@@ -3,20 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context="com.tkstr.movies.DiscoveryActivity">
+    tools:context="com.tkstr.movies.app.DiscoveryActivity"
+    android:baselineAligned="false">
 
     <fragment
-        android:id="@+id/discovery_frag"
-        class="com.tkstr.movies.DiscoveryFragment"
+        android:id="@+id/discovery_fragment"
+        class="com.tkstr.movies.app.DiscoveryFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="3"/>
+        android:layout_weight="3"
+        tools:layout="@layout/fragment_discovery" />
 
     <fragment
-        android:id="@+id/detail_frag"
-        class="com.tkstr.movies.DetailFragment"
+        android:id="@+id/detail_fragment"
+        class="com.tkstr.movies.app.DetailFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2"/>
+        android:layout_weight="2"
+        tools:layout="@layout/fragment_detail" />
 
 </LinearLayout>
