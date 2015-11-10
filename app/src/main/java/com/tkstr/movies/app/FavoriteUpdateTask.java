@@ -1,16 +1,13 @@
 package com.tkstr.movies.app;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.tkstr.movies.R;
 
 import org.json.JSONException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Ben Teichman
@@ -20,8 +17,8 @@ public class FavoriteUpdateTask extends MovieUpdateTask {
     private static final String LOG_TAG = FavoriteUpdateTask.class.getSimpleName();
     private static final String URL_PATH = "/movie";
 
-    public FavoriteUpdateTask(Context context, ArrayAdapter adapter) {
-        super(context, adapter);
+    public FavoriteUpdateTask(Context context) {
+        super(context);
     }
 
     @Override
@@ -30,19 +27,20 @@ public class FavoriteUpdateTask extends MovieUpdateTask {
     }
 
     @Override
-    protected List<PosterAdapter.MovieHolder> doInBackground(String... params) {
+    protected ContentValues[] doInBackground(String... params) {
         Uri baseUri = Uri.parse(BASE_URL + URL_PATH);
 
-        List<PosterAdapter.MovieHolder> movies = new ArrayList<>();
-        for (String id : params) {
+        ContentValues[] values = new ContentValues[params.length];
+        for (int i = 0; i < params.length; i++) {
+            String id = params[i];
             Log.d(LOG_TAG, "recalling favorite with id: " + id);
             String json = makeRequest(baseUri.buildUpon().appendPath(id).build());
             try {
-                movies.add(parseMovie(json));
+                values[i] = parseMovie(json);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "unable to parse response: " + json, e);
             }
         }
-        return movies;
+        return values;
     }
 }

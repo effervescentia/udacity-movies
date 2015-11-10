@@ -1,6 +1,7 @@
 package com.tkstr.movies.app;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -46,8 +47,9 @@ public class DiscoveryActivity extends AppCompatActivity {
         discovery.getGrid().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MovieHolder movie = discovery.getAdapter().getItem(position);
-                String movieId = movie.id;
+                Cursor cursor = (Cursor) discovery.getAdapter().getItem(position);
+                MovieHolder movie = PosterAdapter.parseMovie(cursor);
+                long movieId = movie.id;
                 String title = movie.title;
 
                 if (detail == null || !fragmentSplitView) {

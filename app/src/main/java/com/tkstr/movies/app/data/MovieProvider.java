@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 
 import com.tkstr.movies.app.data.MovieContract.DetailEntry;
-import com.tkstr.movies.app.data.MovieContract.SimpleEntry;
+import com.tkstr.movies.app.data.MovieContract.MovieEntry;
 
 /**
  * @author Ben Teichman
@@ -82,7 +82,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             case TOP_RATED:
                 cursor = dbHelper.getReadableDatabase().query(
-                        SimpleEntry.TOP_RATED_TABLE_NAME,
+                        MovieEntry.TOP_RATED_TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -93,7 +93,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             case POPULAR:
                 cursor = dbHelper.getReadableDatabase().query(
-                        SimpleEntry.POPULAR_TABLE_NAME,
+                        MovieEntry.POPULAR_TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -104,7 +104,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             case FAVORITES:
                 cursor = dbHelper.getReadableDatabase().query(
-                        SimpleEntry.FAVORITES_TABLE_NAME,
+                        MovieEntry.FAVORITES_TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -132,11 +132,11 @@ public class MovieProvider extends ContentProvider {
             case DETAILS:
                 return DetailEntry.CONTENT_TYPE;
             case TOP_RATED:
-                return SimpleEntry.TOP_RATED_CONTENT_TYPE;
+                return MovieEntry.TOP_RATED_CONTENT_TYPE;
             case POPULAR:
-                return SimpleEntry.POPULAR_CONTENT_TYPE;
+                return MovieEntry.POPULAR_CONTENT_TYPE;
             case FAVORITES:
-                return SimpleEntry.FAVORITES_CONTENT_TYPE;
+                return MovieEntry.FAVORITES_CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri:" + uri);
         }
@@ -178,6 +178,15 @@ public class MovieProvider extends ContentProvider {
             case DETAILS:
                 affected = db.delete(DetailEntry.TABLE_NAME, selection, selectionArgs);
                 break;
+            case TOP_RATED:
+                affected = db.delete(MovieEntry.TOP_RATED_TABLE_NAME, selection, selectionArgs);
+                break;
+            case POPULAR:
+                affected = db.delete(MovieEntry.POPULAR_TABLE_NAME, selection, selectionArgs);
+                break;
+            case FAVORITES:
+                affected = db.delete(MovieEntry.FAVORITES_TABLE_NAME, selection, selectionArgs);
+                break;
         }
 
         if (affected != 0) {
@@ -214,11 +223,11 @@ public class MovieProvider extends ContentProvider {
             case DETAILS:
                 return doBulkInsert(uri, values, db, DetailEntry.TABLE_NAME);
             case TOP_RATED:
-                return doBulkInsert(uri, values, db, SimpleEntry.TOP_RATED_TABLE_NAME);
+                return doBulkInsert(uri, values, db, MovieEntry.TOP_RATED_TABLE_NAME);
             case POPULAR:
-                return doBulkInsert(uri, values, db, SimpleEntry.POPULAR_TABLE_NAME);
+                return doBulkInsert(uri, values, db, MovieEntry.POPULAR_TABLE_NAME);
             case FAVORITES:
-                return doBulkInsert(uri, values, db, SimpleEntry.FAVORITES_TABLE_NAME);
+                return doBulkInsert(uri, values, db, MovieEntry.FAVORITES_TABLE_NAME);
             default:
                 return super.bulkInsert(uri, values);
         }

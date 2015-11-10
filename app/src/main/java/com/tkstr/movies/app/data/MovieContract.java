@@ -10,7 +10,7 @@ import android.provider.BaseColumns;
  */
 public class MovieContract {
 
-    public static final String CONTENT_AUTHORITY = "com.tkstr.movies";
+    public static final String CONTENT_AUTHORITY = "com.tkstr.movies.app";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_DETAILS = "details";
     public static final String PATH_TOP_RATED = "top";
@@ -20,7 +20,7 @@ public class MovieContract {
     public static final class DetailEntry implements BaseColumns {
         public static final String TABLE_NAME = "details";
 
-        public static final String COLUMN_ID = "title";
+        public static final String COLUMN_ID = "id";
         public static final String COLUMN_TITLE = "title";
         public static final String COLUMN_IMAGE = "image";
         public static final String COLUMN_YEAR = "year";
@@ -48,13 +48,13 @@ public class MovieContract {
         }
     }
 
-    public static final class SimpleEntry implements BaseColumns {
+    public static final class MovieEntry implements BaseColumns {
         public static final String TOP_RATED_TABLE_NAME = "top";
         public static final String POPULAR_TABLE_NAME = "popular";
         public static final String FAVORITES_TABLE_NAME = "favorites";
 
         public static final String COLUMN_ID = "id";
-        public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_TITLE = "title";
         public static final String COLUMN_IMAGE = "image";
 
         public static final Uri TOP_RATED_CONTENT_URI =

@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.tkstr.movies.app.data.MovieContract.DetailEntry;
-import com.tkstr.movies.app.data.MovieContract.SimpleEntry;
+import com.tkstr.movies.app.data.MovieContract.MovieEntry;
 
 /**
  * @author Ben Teichman
@@ -13,7 +13,7 @@ import com.tkstr.movies.app.data.MovieContract.SimpleEntry;
 public class MovieDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "movie.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public MovieDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -22,9 +22,9 @@ public class MovieDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         createDetailsTable(db);
-        createMovieTable(db, SimpleEntry.TOP_RATED_TABLE_NAME);
-        createMovieTable(db, SimpleEntry.POPULAR_TABLE_NAME);
-        createMovieTable(db, SimpleEntry.FAVORITES_TABLE_NAME);
+        createMovieTable(db, MovieEntry.TOP_RATED_TABLE_NAME);
+        createMovieTable(db, MovieEntry.POPULAR_TABLE_NAME);
+        createMovieTable(db, MovieEntry.FAVORITES_TABLE_NAME);
     }
 
     private void createDetailsTable(SQLiteDatabase database) {
@@ -50,11 +50,11 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
     private void createMovieTable(SQLiteDatabase database, String tableName) {
         final String SQL_CREATE_TABLE = "CREATE TABLE " + tableName + " (" +
-                SimpleEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                MovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
 
-                SimpleEntry.COLUMN_ID + " LONG NOT NULL," +
-                SimpleEntry.COLUMN_NAME + " TEXT NON NULL," +
-                SimpleEntry.COLUMN_IMAGE + " TEXT NON NULL);";
+                MovieEntry.COLUMN_ID + " LONG NOT NULL," +
+                MovieEntry.COLUMN_TITLE + " TEXT NON NULL," +
+                MovieEntry.COLUMN_IMAGE + " TEXT NON NULL);";
 
         database.execSQL(SQL_CREATE_TABLE);
     }
@@ -62,6 +62,9 @@ public class MovieDbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + DetailEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TOP_RATED_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.POPULAR_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.FAVORITES_TABLE_NAME);
         onCreate(db);
     }
 }

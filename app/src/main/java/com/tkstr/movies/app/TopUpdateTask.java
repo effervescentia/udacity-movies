@@ -1,16 +1,15 @@
 package com.tkstr.movies.app;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
-import com.tkstr.movies.app.PosterAdapter.MovieHolder;
 import com.tkstr.movies.R;
+import com.tkstr.movies.app.data.MovieContract.MovieEntry;
 
 import org.json.JSONException;
-
-import java.util.List;
 
 /**
  * @author Ben Teichman
@@ -18,9 +17,10 @@ import java.util.List;
 public class TopUpdateTask extends MovieUpdateTask {
 
     private static final String URL_PATH = "/discover/movie?";
+    private String sort;
 
-    public TopUpdateTask(Context context, ArrayAdapter adapter) {
-        super(context, adapter);
+    public TopUpdateTask(Context context) {
+        super(context);
     }
 
     @Override
@@ -29,18 +29,33 @@ public class TopUpdateTask extends MovieUpdateTask {
     }
 
     @Override
-    protected List<MovieHolder> doInBackground(String... params) {
+    protected ContentValues[] doInBackground(String... params) {
+        sort = params[0];
+
         Uri uri = Uri.parse(BASE_URL + URL_PATH).buildUpon()
-                .appendQueryParameter("sort_by", params[0])
+                .appendQueryParameter("sort_by", sort)
                 .build();
 
-        List<MovieHolder> movies = null;
+        ContentValues[] values = null;
         try {
             String json = makeRequest(uri);
-            movies = parseMovies(json);
+            values = parseMovies(json);
         } catch (JSONException e) {
             Log.e(getClass().getSimpleName(), "unable to parse response", e);
         }
-        return movies;
+        return values;
+    }
+
+    @Override
+    protected void onPostExecute(ContentValues[] result) {
+        ContentResolver contentResolver = context.getContentResolver();
+        if (DiscoveryFragment.SORT_RATING.equals(sort)) {
+            contentResolver.delete(MovieEntry.TOP_RATED_CONTENT_URI, null, null);
+            contentResolver.bulkInsert(MovieEntry.TOP_RATED_CONTENT_URI, result);
+        } else {
+            contentResolver.delete(MovieEntry.POPULAR_CONTENT_URI, null, null);
+            contentResolver.bulkInsert(MovieEntry.POPULAR_CONTENT_URI, result);
+        }
+        super.onPostExecute(result);
     }
 }

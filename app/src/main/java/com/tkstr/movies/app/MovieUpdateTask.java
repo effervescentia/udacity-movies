@@ -1,60 +1,58 @@
 package com.tkstr.movies.app;
 
+import android.content.ContentValues;
 import android.content.Context;
-import android.widget.ArrayAdapter;
+import android.util.Log;
+
+import com.tkstr.movies.app.data.MovieContract.MovieEntry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Ben Teichman
  */
-public abstract class MovieUpdateTask extends NetworkTask<List<PosterAdapter.MovieHolder>> {
+public abstract class MovieUpdateTask extends NetworkTask<ContentValues[]> {
 
-    protected static final String BASE_URL = "http://api.themoviedb.org/3";
+    private static final String LOG_TAG = MovieUpdateTask.class.getSimpleName();
 
-    private ArrayAdapter adapter;
-
-    public MovieUpdateTask(Context context, ArrayAdapter adapter) {
+    public MovieUpdateTask(Context context) {
         super(context);
-        this.adapter = adapter;
     }
 
     @Override
-    protected void onPostExecute(List<PosterAdapter.MovieHolder> result) {
+    protected void onPostExecute(ContentValues[] result) {
         if (result != null) {
-            adapter.clear();
-            //noinspection unchecked
-            adapter.addAll(result);
+
         }
         super.onPostExecute(result);
     }
 
-    protected PosterAdapter.MovieHolder parseMovie(String json) throws JSONException {
+    protected ContentValues parseMovie(String json) throws JSONException {
         return extractMovie(new JSONObject(json));
     }
 
-    protected List<PosterAdapter.MovieHolder> parseMovies(String json) throws JSONException {
-        List<PosterAdapter.MovieHolder> holders = new ArrayList<>();
+    protected ContentValues[] parseMovies(String json) throws JSONException {
 
         JSONObject response = new JSONObject(json);
         JSONArray results = response.getJSONArray("results");
+        ContentValues[] values = new ContentValues[results.length()];
         for (int i = 0; i < results.length(); i++) {
-            holders.add(extractMovie(results.getJSONObject(i)));
+            values[i] = extractMovie(results.getJSONObject(i));
+            Log.d(LOG_TAG, "parsing " + values[i]);
         }
 
-        return holders;
+
+        return values;
     }
 
-    private PosterAdapter.MovieHolder extractMovie(JSONObject result) throws JSONException {
-        PosterAdapter.MovieHolder holder = new PosterAdapter.MovieHolder();
-        holder.id = result.getString("id");
-        holder.image = result.getString("poster_path");
-        holder.title = result.getString("title");
-        return holder;
+    private ContentValues extractMovie(JSONObject result) throws JSONException {
+        ContentValues values = new ContentValues();
+        values.put(MovieEntry.COLUMN_ID, result.getLong("id"));
+        values.put(MovieEntry.COLUMN_TITLE, result.getString("title"));
+        values.put(MovieEntry.COLUMN_IMAGE, result.getString("poster_path"));
+
+        return values;
     }
 }

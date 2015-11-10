@@ -40,7 +40,7 @@ public class DetailFragment extends Fragment {
 
     private DetailHolder details;
     private FavoritePrefs favorites;
-    private ComboAdapter comboAdapter;
+    private ComboAdapter adapter;
     private ShareActionProvider shareActionProvider;
     private View fragmentView;
 
@@ -77,7 +77,7 @@ public class DetailFragment extends Fragment {
         comboList.addHeaderView(inflater.inflate(R.layout.header_detail, comboList, false));
 
         if (details == null) {
-            String id = getActivity().getIntent().getStringExtra(ID_KEY);
+            long id = getActivity().getIntent().getLongExtra(ID_KEY, -1);
             String title = getActivity().getIntent().getStringExtra(TITLE_KEY);
             updateDetails(id, title);
         } else {
@@ -87,10 +87,10 @@ public class DetailFragment extends Fragment {
         return fragmentView;
     }
 
-    public void updateDetails(String id, String title) {
+    public void updateDetails(Long id, String title) {
         if (id != null && title != null && this.getContext() != null) {
             Log.d(LOG_KEY, "loading details for : " + title);
-            new DetailTask(this, title).execute(id);
+            new DetailTask(this, title).execute(String.valueOf(id));
         }
     }
 
@@ -129,7 +129,7 @@ public class DetailFragment extends Fragment {
         styleFavoriteButton(button);
 
         ListView comboList = (ListView) fragmentView.findViewById(R.id.combo_list);
-        comboAdapter = new ComboAdapter(getContext(), details.trailers, details.reviews);
+        adapter = new ComboAdapter(getContext(), details.trailers, details.reviews);
 
         if (details.trailers != null && details.trailers.size() > 0) {
             Intent intent = new Intent();
@@ -142,7 +142,7 @@ public class DetailFragment extends Fragment {
             }
         }
 
-        comboList.setAdapter(comboAdapter);
+        comboList.setAdapter(adapter);
 
         comboList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -150,9 +150,9 @@ public class DetailFragment extends Fragment {
                 if (position > 0) {
                     position--; //to account for header
 
-                    int itemType = comboAdapter.getItemViewType(position);
+                    int itemType = adapter.getItemViewType(position);
                     if (itemType == ComboAdapter.TRAILER_TYPE) {
-                        TrailerHolder holder = (TrailerHolder) comboAdapter.getItem(position);
+                        TrailerHolder holder = (TrailerHolder) adapter.getItem(position);
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(holder.url)));
                     }
                 }

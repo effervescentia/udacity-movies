@@ -1,6 +1,7 @@
 package com.tkstr.movies.app;
 
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -16,13 +17,14 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.tkstr.movies.R;
+import com.tkstr.movies.app.PosterAdapter.MovieHolder;
+import com.tkstr.movies.app.data.MovieContract.MovieEntry;
 
 import java.util.ArrayList;
 import java.util.Set;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.widget.Toast.LENGTH_SHORT;
-import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 /**
  * @author Ben Teichman
@@ -37,7 +39,7 @@ public class DiscoveryFragment extends Fragment {
 
     private PosterAdapter adapter;
     private GridView grid;
-    private ArrayList<PosterAdapter.MovieHolder> movies = new ArrayList<>();
+    private ArrayList<MovieHolder> movies = new ArrayList<>();
     private String sort = SORT_POPULARITY;
     private FavoritePrefs favorites;
 
@@ -64,10 +66,13 @@ public class DiscoveryFragment extends Fragment {
                              Bundle savedInstanceState) {
         grid = (GridView) inflater.inflate(R.layout.fragment_discovery, container, false);
 
-        adapter = new PosterAdapter(getContext(), movies);
-        if (emptyIfNull(movies).isEmpty()) {
+        String[] projection = new String[]{MovieEntry._ID, MovieEntry.COLUMN_ID, MovieEntry.COLUMN_TITLE, MovieEntry.COLUMN_IMAGE};
+        Cursor movieCursor = getActivity().getContentResolver().query(MovieEntry.FAVORITES_CONTENT_URI, projection, null, null, null, null);
+        if (!movieCursor.moveToFirst()) {
             reload();
         }
+        adapter = new PosterAdapter(getContext(), movieCursor);
+
         grid.setAdapter(adapter);
 
         return grid;
@@ -89,14 +94,6 @@ public class DiscoveryFragment extends Fragment {
         return sort;
     }
 
-    public PosterAdapter getAdapter() {
-        return adapter;
-    }
-
-    public void setAdapter(PosterAdapter adapter) {
-        this.adapter = adapter;
-    }
-
     public GridView getGrid() {
         return grid;
     }
@@ -105,15 +102,23 @@ public class DiscoveryFragment extends Fragment {
         this.grid = grid;
     }
 
+    public PosterAdapter getAdapter() {
+        return adapter;
+    }
+
+    public void setAdapter(PosterAdapter adapter) {
+        this.adapter = adapter;
+    }
+
     public void reload() {
         if (hasNetworkAccess()) {
             if (SORT_FAVORITES.equals(sort)) {
                 Log.d(getClass().getSimpleName(), "restoring movie list from favorites");
                 Set<String> movieIds = this.favorites.getFavorites();
-                new FavoriteUpdateTask(getContext(), adapter).execute(movieIds.toArray(new String[movieIds.size()]));
+                new FavoriteUpdateTask(getContext()).execute(movieIds.toArray(new String[movieIds.size()]));
             } else {
                 Log.d(getClass().getSimpleName(), "reloading movie list with sort: " + sort);
-                new TopUpdateTask(getContext(), adapter).execute(sort);
+                new TopUpdateTask(getContext()).execute(sort);
             }
         } else {
             Toast.makeText(getContext(), "Unable to connect to network", LENGTH_SHORT).show();
