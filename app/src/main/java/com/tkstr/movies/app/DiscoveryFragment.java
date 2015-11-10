@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -14,7 +15,6 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.tkstr.movies.R;
 import com.tkstr.movies.app.PosterAdapter.MovieHolder;
@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
-import static android.widget.Toast.LENGTH_SHORT;
 
 /**
  * @author Ben Teichman
@@ -66,8 +65,8 @@ public class DiscoveryFragment extends Fragment {
                              Bundle savedInstanceState) {
         grid = (GridView) inflater.inflate(R.layout.fragment_discovery, container, false);
 
-        String[] projection = new String[]{MovieEntry._ID, MovieEntry.COLUMN_ID, MovieEntry.COLUMN_TITLE, MovieEntry.COLUMN_IMAGE};
-        Cursor movieCursor = getActivity().getContentResolver().query(MovieEntry.FAVORITES_CONTENT_URI, projection, null, null, null, null);
+        Cursor movieCursor = getActivity().getContentResolver().query(MovieUpdateTask.getContentUriFromSort(sort),
+                MovieEntry.PROJECTION, null, null, null, null);
         if (!movieCursor.moveToFirst()) {
             reload();
         }
@@ -115,13 +114,17 @@ public class DiscoveryFragment extends Fragment {
             if (SORT_FAVORITES.equals(sort)) {
                 Log.d(getClass().getSimpleName(), "restoring movie list from favorites");
                 Set<String> movieIds = this.favorites.getFavorites();
-                new FavoriteUpdateTask(getContext()).execute(movieIds.toArray(new String[movieIds.size()]));
+                new FavoriteUpdateTask(getContext(), adapter).execute(movieIds.toArray(new String[movieIds.size()]));
             } else {
                 Log.d(getClass().getSimpleName(), "reloading movie list with sort: " + sort);
-                new TopUpdateTask(getContext()).execute(sort);
+                new TopUpdateTask(getContext(), adapter, sort).execute();
             }
         } else {
-            Toast.makeText(getContext(), "Unable to connect to network", LENGTH_SHORT).show();
+            Log.d("DDD", "updatingggg cursor");
+            Uri uri = MovieUpdateTask.getContentUriFromSort(sort);
+            Cursor cursor = getActivity().getContentResolver().query(uri, MovieEntry.PROJECTION, null, null, null);
+            adapter.changeCursor(cursor);
+            adapter.notifyDataSetChanged();
         }
     }
 

@@ -1,9 +1,12 @@
 package com.tkstr.movies.app;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
+import com.tkstr.movies.app.PosterAdapter.MovieHolder;
 import com.tkstr.movies.app.data.MovieContract.MovieEntry;
 
 import org.json.JSONArray;
@@ -17,20 +20,17 @@ public abstract class MovieUpdateTask extends NetworkTask<ContentValues[]> {
 
     private static final String LOG_TAG = MovieUpdateTask.class.getSimpleName();
 
-    public MovieUpdateTask(Context context) {
+    protected String sort;
+    protected PosterAdapter adapter;
+
+    public MovieUpdateTask(Context context, PosterAdapter adapter, String sort) {
         super(context);
-    }
-
-    @Override
-    protected void onPostExecute(ContentValues[] result) {
-        if (result != null) {
-
-        }
-        super.onPostExecute(result);
+        this.sort = sort;
+        this.adapter = adapter;
     }
 
     protected ContentValues parseMovie(String json) throws JSONException {
-        return extractMovie(new JSONObject(json));
+        return MovieHolder.fromJson(new JSONObject(json));
     }
 
     protected ContentValues[] parseMovies(String json) throws JSONException {
@@ -39,7 +39,7 @@ public abstract class MovieUpdateTask extends NetworkTask<ContentValues[]> {
         JSONArray results = response.getJSONArray("results");
         ContentValues[] values = new ContentValues[results.length()];
         for (int i = 0; i < results.length(); i++) {
-            values[i] = extractMovie(results.getJSONObject(i));
+            values[i] = MovieHolder.fromJson(results.getJSONObject(i));
             Log.d(LOG_TAG, "parsing " + values[i]);
         }
 
@@ -47,12 +47,29 @@ public abstract class MovieUpdateTask extends NetworkTask<ContentValues[]> {
         return values;
     }
 
-    private ContentValues extractMovie(JSONObject result) throws JSONException {
-        ContentValues values = new ContentValues();
-        values.put(MovieEntry.COLUMN_ID, result.getLong("id"));
-        values.put(MovieEntry.COLUMN_TITLE, result.getString("title"));
-        values.put(MovieEntry.COLUMN_IMAGE, result.getString("poster_path"));
+    public static Uri getContentUriFromSort(String sort) {
+        switch (sort) {
+            case DiscoveryFragment.SORT_RATING:
+                return MovieEntry.TOP_RATED_CONTENT_URI;
+            case DiscoveryFragment.SORT_POPULARITY:
+                return MovieEntry.POPULAR_CONTENT_URI;
+            case DiscoveryFragment.SORT_FAVORITES:
+                return MovieEntry.FAVORITES_CONTENT_URI;
+            default:
+                return null;
+        }
+    }
 
-        return values;
+    @Override
+    protected void onPostExecute(ContentValues[] result) {
+        ContentResolver contentResolver = context.getContentResolver();
+        Uri contentUri = getContentUriFromSort(sort);
+        contentResolver.delete(contentUri, null, null);
+        contentResolver.bulkInsert(contentUri, result);
+
+        adapter.changeCursor(context.getContentResolver().query(contentUri, MovieEntry.PROJECTION, null, null, null));
+        adapter.notifyDataSetChanged();
+
+        super.onPostExecute(result);
     }
 }

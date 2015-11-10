@@ -7,6 +7,7 @@ import com.tkstr.movies.R;
 import com.tkstr.movies.app.DetailFragment.DetailHolder;
 import com.tkstr.movies.app.DetailFragment.ReviewHolder;
 import com.tkstr.movies.app.DetailFragment.TrailerHolder;
+import com.tkstr.movies.app.data.MovieContract.DetailEntry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,6 +57,7 @@ public class DetailTask extends NetworkTask<DetailHolder> {
     @Override
     protected void onPostExecute(DetailHolder details) {
         if (details != null) {
+            context.getContentResolver().insert(DetailEntry.CONTENT_URI, details.toContentValues());
             fragment.setDetails(details).fillDetails();
         }
         super.onPostExecute(details);

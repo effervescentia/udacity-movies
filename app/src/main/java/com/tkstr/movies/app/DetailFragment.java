@@ -1,6 +1,10 @@
 package com.tkstr.movies.app;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -24,15 +28,22 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.tkstr.movies.R;
+import com.tkstr.movies.app.data.MovieContract.DetailEntry;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+
+import static android.content.Context.CONNECTIVITY_SERVICE;
 
 /**
  * @author Ben Teichman
  */
 public class DetailFragment extends Fragment {
 
-    private static final String LOG_KEY = DetailFragment.class.getSimpleName();
+    private static final String LOG_TAG = DetailFragment.class.getSimpleName();
     private static final String THUMBNAIL_URL = "http://image.tmdb.org/t/p/w154";
     public static final String ID_KEY = "id";
     public static final String TITLE_KEY = "title";
@@ -89,9 +100,27 @@ public class DetailFragment extends Fragment {
 
     public void updateDetails(Long id, String title) {
         if (id != null && title != null && this.getContext() != null) {
-            Log.d(LOG_KEY, "loading details for : " + title);
-            new DetailTask(this, title).execute(String.valueOf(id));
+            Log.d(LOG_TAG, "loading details for : " + title);
+
+            String[] projection = new String[]{DetailEntry._ID, DetailEntry.COLUMN_ID, DetailEntry.COLUMN_TITLE,
+                    DetailEntry.COLUMN_IMAGE, DetailEntry.COLUMN_YEAR, DetailEntry.COLUMN_RUNTIME, DetailEntry.COLUMN_RATING,
+                    DetailEntry.COLUMN_DESCRIPTION, DetailEntry.COLUMN_FAVORITE, DetailEntry.COLUMN_TRAILERS_JSON,
+                    DetailEntry.COLUMN_REVIEWS_JSON};
+            Cursor cursor = getActivity().getContentResolver().query(DetailEntry.buildDetailsUri(id), projection, null, null, null);
+            if (cursor.moveToFirst()) {
+                details = DetailHolder.fromCursor(cursor);
+                fillDetails();
+            } else if (hasNetworkAccess()) {
+                new DetailTask(this, title).execute(String.valueOf(id));
+            }
+            cursor.close();
         }
+    }
+
+    private boolean hasNetworkAccess() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     protected void fillDetails() {
@@ -268,6 +297,79 @@ public class DetailFragment extends Fragment {
 
             dest.writeBundle(bundle);
         }
+
+        public ContentValues toContentValues() {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DetailEntry.COLUMN_ID, id);
+            contentValues.put(DetailEntry.COLUMN_TITLE, title);
+            contentValues.put(DetailEntry.COLUMN_IMAGE, image);
+            contentValues.put(DetailEntry.COLUMN_YEAR, year);
+            contentValues.put(DetailEntry.COLUMN_RUNTIME, runtime);
+            contentValues.put(DetailEntry.COLUMN_RATING, rating);
+            contentValues.put(DetailEntry.COLUMN_DESCRIPTION, description);
+            contentValues.put(DetailEntry.COLUMN_FAVORITE, favorite ? 1 : 0);
+
+            JSONArray jsonTrailers = new JSONArray();
+            JSONArray jsonReviews = new JSONArray();
+            try {
+                for (TrailerHolder trailer : trailers) {
+                    jsonTrailers.put(trailer.toJson());
+                }
+
+                for (ReviewHolder review : reviews) {
+                    jsonReviews.put(review.toJson());
+                }
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "unable to convert json for SQL", e);
+            }
+
+            contentValues.put(DetailEntry.COLUMN_TRAILERS_JSON, jsonTrailers.toString());
+            contentValues.put(DetailEntry.COLUMN_REVIEWS_JSON, jsonReviews.toString());
+
+            return contentValues;
+        }
+
+        public static DetailHolder fromCursor(Cursor cursor) {
+            DetailHolder holder = new DetailHolder();
+
+            int idIndex = cursor.getColumnIndex(DetailEntry.COLUMN_ID);
+            int titleIndex = cursor.getColumnIndex(DetailEntry.COLUMN_TITLE);
+            int imageIndex = cursor.getColumnIndex(DetailEntry.COLUMN_IMAGE);
+            int yearIndex = cursor.getColumnIndex(DetailEntry.COLUMN_YEAR);
+            int runtimeIndex = cursor.getColumnIndex(DetailEntry.COLUMN_RUNTIME);
+            int ratingIndex = cursor.getColumnIndex(DetailEntry.COLUMN_RATING);
+            int descriptionIndex = cursor.getColumnIndex(DetailEntry.COLUMN_DESCRIPTION);
+            int favoriteIndex = cursor.getColumnIndex(DetailEntry.COLUMN_FAVORITE);
+            int trailersIndex = cursor.getColumnIndex(DetailEntry.COLUMN_TRAILERS_JSON);
+            int reviewsIndex = cursor.getColumnIndex(DetailEntry.COLUMN_REVIEWS_JSON);
+
+            holder.id = cursor.getLong(idIndex);
+            holder.title = cursor.getString(titleIndex);
+            holder.image = cursor.getString(imageIndex);
+            holder.year = cursor.getInt(yearIndex);
+            holder.runtime = cursor.getInt(runtimeIndex);
+            holder.rating = cursor.getDouble(ratingIndex);
+            holder.description = cursor.getString(descriptionIndex);
+            holder.favorite = cursor.getInt(favoriteIndex) == 1;
+            holder.trailers = new ArrayList<>();
+            holder.reviews = new ArrayList<>();
+
+            try {
+                JSONArray trailers = new JSONArray(cursor.getString(trailersIndex));
+                for (int i = 0; i < trailers.length(); i++) {
+                    holder.trailers.add(TrailerHolder.fromJson(trailers.getJSONObject(i)));
+                }
+
+                JSONArray reviews = new JSONArray(cursor.getString(reviewsIndex));
+                for (int i = 0; i < reviews.length(); i++) {
+                    holder.reviews.add(ReviewHolder.fromJson(reviews.getJSONObject(i)));
+                }
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "unable to parse json from SQLite", e);
+            }
+
+            return holder;
+        }
     }
 
     public abstract static class MetadataHolder implements Parcelable {
@@ -315,6 +417,22 @@ public class DetailFragment extends Fragment {
 
             dest.writeBundle(bundle);
         }
+
+        public JSONObject toJson() throws JSONException {
+            JSONObject json = new JSONObject();
+            json.put("name", name);
+            json.put("url", url);
+
+            return json;
+        }
+
+        public static TrailerHolder fromJson(JSONObject json) throws JSONException {
+            TrailerHolder holder = new TrailerHolder();
+            holder.name = json.getString("name");
+            holder.url = json.getString("url");
+
+            return holder;
+        }
     }
 
     public static class ReviewHolder extends MetadataHolder {
@@ -358,6 +476,22 @@ public class DetailFragment extends Fragment {
             bundle.putString(CONTENT_KEY, content);
 
             dest.writeBundle(bundle);
+        }
+
+        public JSONObject toJson() throws JSONException {
+            JSONObject json = new JSONObject();
+            json.put("author", author);
+            json.put("content", content);
+
+            return json;
+        }
+
+        public static ReviewHolder fromJson(JSONObject json) throws JSONException {
+            ReviewHolder holder = new ReviewHolder();
+            holder.author = json.getString("author");
+            holder.content = json.getString("content");
+
+            return holder;
         }
     }
 }

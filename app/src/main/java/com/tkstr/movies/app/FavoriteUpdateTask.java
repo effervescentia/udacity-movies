@@ -17,8 +17,8 @@ public class FavoriteUpdateTask extends MovieUpdateTask {
     private static final String LOG_TAG = FavoriteUpdateTask.class.getSimpleName();
     private static final String URL_PATH = "/movie";
 
-    public FavoriteUpdateTask(Context context) {
-        super(context);
+    public FavoriteUpdateTask(Context context, PosterAdapter adapter) {
+        super(context, adapter, DiscoveryFragment.SORT_FAVORITES);
     }
 
     @Override

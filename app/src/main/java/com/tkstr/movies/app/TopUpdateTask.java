@@ -1,13 +1,11 @@
 package com.tkstr.movies.app;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
 import com.tkstr.movies.R;
-import com.tkstr.movies.app.data.MovieContract.MovieEntry;
 
 import org.json.JSONException;
 
@@ -17,10 +15,9 @@ import org.json.JSONException;
 public class TopUpdateTask extends MovieUpdateTask {
 
     private static final String URL_PATH = "/discover/movie?";
-    private String sort;
 
-    public TopUpdateTask(Context context) {
-        super(context);
+    public TopUpdateTask(Context context, PosterAdapter adapter, String sort) {
+        super(context, adapter, sort);
     }
 
     @Override
@@ -30,7 +27,6 @@ public class TopUpdateTask extends MovieUpdateTask {
 
     @Override
     protected ContentValues[] doInBackground(String... params) {
-        sort = params[0];
 
         Uri uri = Uri.parse(BASE_URL + URL_PATH).buildUpon()
                 .appendQueryParameter("sort_by", sort)
@@ -44,18 +40,5 @@ public class TopUpdateTask extends MovieUpdateTask {
             Log.e(getClass().getSimpleName(), "unable to parse response", e);
         }
         return values;
-    }
-
-    @Override
-    protected void onPostExecute(ContentValues[] result) {
-        ContentResolver contentResolver = context.getContentResolver();
-        if (DiscoveryFragment.SORT_RATING.equals(sort)) {
-            contentResolver.delete(MovieEntry.TOP_RATED_CONTENT_URI, null, null);
-            contentResolver.bulkInsert(MovieEntry.TOP_RATED_CONTENT_URI, result);
-        } else {
-            contentResolver.delete(MovieEntry.POPULAR_CONTENT_URI, null, null);
-            contentResolver.bulkInsert(MovieEntry.POPULAR_CONTENT_URI, result);
-        }
-        super.onPostExecute(result);
     }
 }

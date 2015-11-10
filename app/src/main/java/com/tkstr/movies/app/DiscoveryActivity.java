@@ -48,7 +48,7 @@ public class DiscoveryActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Cursor cursor = (Cursor) discovery.getAdapter().getItem(position);
-                MovieHolder movie = PosterAdapter.parseMovie(cursor);
+                MovieHolder movie = MovieHolder.fromCursor(cursor);
                 long movieId = movie.id;
                 String title = movie.title;
 

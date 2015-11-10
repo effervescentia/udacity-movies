@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.tkstr.movies.app.data.MovieContract.DetailEntry;
 import com.tkstr.movies.app.data.MovieContract.MovieEntry;
@@ -76,6 +77,9 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor;
+
+        Log.d(LOG_KEY, "query called for " + uri);
+
         switch (uriMatcher.match(uri)) {
             case DETAILS_WITH_ID:
                 cursor = getMovieDetailsById(uri, projection, sortOrder);
@@ -149,6 +153,8 @@ public class MovieProvider extends ContentProvider {
         final int match = uriMatcher.match(uri);
         Uri returnUri;
 
+        Log.d(LOG_KEY, "insert called for " + uri);
+
         switch (match) {
             case DETAILS:
                 long _id = db.insert(DetailEntry.TABLE_NAME, null, values);
@@ -170,6 +176,8 @@ public class MovieProvider extends ContentProvider {
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         final int match = uriMatcher.match(uri);
         int affected = 0;
+
+        Log.d(LOG_KEY, "delete called for " + uri);
 
         if (selection == null) {
             selection = "1";
@@ -202,6 +210,8 @@ public class MovieProvider extends ContentProvider {
         final int match = uriMatcher.match(uri);
         int affected = 0;
 
+        Log.d(LOG_KEY, "update called for " + uri);
+
         switch (match) {
             case DETAILS:
                 affected = db.update(DetailEntry.TABLE_NAME, values, selection, selectionArgs);
@@ -218,6 +228,8 @@ public class MovieProvider extends ContentProvider {
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         final int match = uriMatcher.match(uri);
+
+        Log.d(LOG_KEY, "bulk_insert called for " + uri);
 
         switch (match) {
             case DETAILS:

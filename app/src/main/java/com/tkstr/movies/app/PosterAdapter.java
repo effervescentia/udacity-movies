@@ -1,5 +1,6 @@
 package com.tkstr.movies.app;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -12,6 +13,9 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.tkstr.movies.app.data.MovieContract.MovieEntry;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Ben Teichman
@@ -33,27 +37,13 @@ public class PosterAdapter extends CursorAdapter {
         return image;
     }
 
-    public static MovieHolder parseMovie(Cursor cursor) {
-        MovieHolder holder = new MovieHolder();
-
-        int idIndex = cursor.getColumnIndex(MovieEntry.COLUMN_ID);
-        int titleIndex = cursor.getColumnIndex(MovieEntry.COLUMN_TITLE);
-        int imageIndex = cursor.getColumnIndex(MovieEntry.COLUMN_IMAGE);
-
-        holder.id = cursor.getLong(idIndex);
-        holder.title = cursor.getString(titleIndex);
-        holder.image = cursor.getString(imageIndex);
-
-        return holder;
-    }
-
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         bindImage((ImageView) view, context, cursor);
     }
 
     private void bindImage(ImageView image, Context context, Cursor cursor) {
-        MovieHolder holder = parseMovie(cursor);
+        MovieHolder holder = MovieHolder.fromCursor(cursor);
 
         Glide.with(context)
                 .load(BASE_URL + holder.image)
@@ -106,6 +96,29 @@ public class PosterAdapter extends CursorAdapter {
             bundle.putString(IMAGE_KEY, image);
 
             dest.writeBundle(bundle);
+        }
+
+        public static MovieHolder fromCursor(Cursor cursor) {
+            MovieHolder holder = new MovieHolder();
+
+            int idIndex = cursor.getColumnIndex(MovieEntry.COLUMN_ID);
+            int titleIndex = cursor.getColumnIndex(MovieEntry.COLUMN_TITLE);
+            int imageIndex = cursor.getColumnIndex(MovieEntry.COLUMN_IMAGE);
+
+            holder.id = cursor.getLong(idIndex);
+            holder.title = cursor.getString(titleIndex);
+            holder.image = cursor.getString(imageIndex);
+
+            return holder;
+        }
+
+        public static ContentValues fromJson(JSONObject json) throws JSONException {
+            ContentValues values = new ContentValues();
+            values.put(MovieEntry.COLUMN_ID, json.getLong("id"));
+            values.put(MovieEntry.COLUMN_TITLE, json.getString("title"));
+            values.put(MovieEntry.COLUMN_IMAGE, json.getString("poster_path"));
+
+            return values;
         }
     }
 }

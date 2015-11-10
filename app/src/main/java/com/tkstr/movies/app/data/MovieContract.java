@@ -60,9 +60,9 @@ public class MovieContract {
         public static final Uri TOP_RATED_CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_TOP_RATED).build();
         public static final Uri POPULAR_CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_TOP_RATED).build();
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_POPULAR).build();
         public static final Uri FAVORITES_CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_TOP_RATED).build();
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_FAVORITES).build();
 
         public static final String TOP_RATED_CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TOP_RATED;
@@ -70,6 +70,8 @@ public class MovieContract {
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_POPULAR;
         public static final String FAVORITES_CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_FAVORITES;
+
+        public static final String[] PROJECTION = new String[]{MovieEntry._ID, MovieEntry.COLUMN_ID, MovieEntry.COLUMN_TITLE, MovieEntry.COLUMN_IMAGE};
     }
 
 }
