@@ -1,42 +1,71 @@
 package com.tkstr.movies;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.Toast;
 
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.tkstr.movies.DetailFragment.ID_KEY;
+import static com.tkstr.movies.DetailFragment.TITLE_KEY;
 import static com.tkstr.movies.DiscoveryFragment.SORT_FAVORITES;
 import static com.tkstr.movies.DiscoveryFragment.SORT_POPULARITY;
 import static com.tkstr.movies.DiscoveryFragment.SORT_RATING;
 
 public class DiscoveryActivity extends AppCompatActivity {
 
-    private DiscoveryFragment fragment;
-    private static final String FRAGMENT_TAG = "frg";
+    private DiscoveryFragment discovery;
+    private DetailFragment detail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_discovery);
 
-        if (savedInstanceState == null) {
-            fragment = new DiscoveryFragment();
+        detail = (DetailFragment) getSupportFragmentManager().findFragmentById(R.id.detail_frag);
 
+        if (detail != null)
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.discovery_fragment, fragment, FRAGMENT_TAG)
+                    .hide(detail)
                     .commit();
-        } else {
-            fragment = (DiscoveryFragment) getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
-        }
+
+        discovery = (DiscoveryFragment) getSupportFragmentManager().findFragmentById(R.id.discovery_frag);
+        discovery.getGrid().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                PosterAdapter.MovieHolder movie = discovery.getAdapter().getItem(position);
+                String movieId = movie.id;
+                String title = movie.title;
+
+                if (detail == null) {
+                    Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+                    intent.putExtra(ID_KEY, movieId);
+                    intent.putExtra(TITLE_KEY, title);
+                    startActivity(intent);
+                } else {
+                    detail.updateDetails(movieId, title);
+                    if (detail.isHidden()) {
+                        GridView grid = discovery.getGrid();
+                        grid.setNumColumns(3);
+
+                        getSupportFragmentManager().beginTransaction()
+                                .show(detail)
+                                .commit();
+                    }
+                }
+            }
+        });
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_discovery, menu);
-        return true;
+    protected void onStop() {
+        detail = null;
+        super.onStop();
     }
 
     @Override
@@ -55,7 +84,7 @@ public class DiscoveryActivity extends AppCompatActivity {
             }
         }
 
-        switch (fragment.getSort()) {
+        switch (discovery.getSort()) {
             case SORT_POPULARITY:
                 menu.findItem(R.id.sort_popularity).setChecked(true);
                 break;
@@ -86,7 +115,7 @@ public class DiscoveryActivity extends AppCompatActivity {
                 sort(SORT_FAVORITES, R.string.sorting_favorite);
                 break;
             case R.id.action_reset:
-                fragment.clearFavorites();
+                discovery.clearFavorites();
                 break;
         }
 
@@ -95,6 +124,6 @@ public class DiscoveryActivity extends AppCompatActivity {
 
     private void sort(String sort, int messageId) {
         Toast.makeText(getApplicationContext(), getResources().getString(messageId), LENGTH_SHORT).show();
-        fragment.setSort(sort).reload();
+        discovery.setSort(sort).reload();
     }
 }

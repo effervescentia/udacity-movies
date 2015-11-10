@@ -4,4 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.tkstr.movies.DiscoveryActivity"
-    tools:ignore="MergeRootFrame"/>
+    tools:ignore="MergeRootFrame">
+
+    <fragment
+        android:id="@+id/discovery_frag"
+        class="com.tkstr.movies.DiscoveryFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>

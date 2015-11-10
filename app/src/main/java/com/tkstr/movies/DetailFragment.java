@@ -7,9 +7,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -37,6 +41,7 @@ public class DetailFragment extends Fragment {
     private FavoritePrefs favorites;
     private ComboAdapter comboAdapter;
     private ShareActionProvider shareActionProvider;
+    private View fragmentView;
 
     public DetailFragment() {
     }
@@ -44,6 +49,7 @@ public class DetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (savedInstanceState != null) {
             details = savedInstanceState.getParcelable(DETAILS_KEY);
         }
@@ -51,61 +57,77 @@ public class DetailFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+        inflater.inflate(R.menu.menu_detail, menu);
+
+        MenuItem share = menu.findItem(R.id.action_share);
+        setShareActionProvider((ShareActionProvider) MenuItemCompat.getActionProvider(share));
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View v = inflater.inflate(R.layout.fragment_detail, container, false);
+        fragmentView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        ListView comboList = (ListView) v.findViewById(R.id.combo_list);
+        ListView comboList = (ListView) fragmentView.findViewById(R.id.combo_list);
 
         comboList.addHeaderView(inflater.inflate(R.layout.header_detail, comboList, false));
 
         if (details == null) {
             String id = getActivity().getIntent().getStringExtra(ID_KEY);
             String title = getActivity().getIntent().getStringExtra(TITLE_KEY);
-            Log.d(LOG_KEY, "loading details for : " + title);
-            new DetailTask(this, v, title).execute(id);
+            updateDetails(id, title);
         } else {
-            fillDetails(v);
+            fillDetails();
         }
 
-        return v;
+        return fragmentView;
     }
 
-    protected void fillDetails(View view) {
-        TextView title = (TextView) view.findViewById(R.id.title);
+    public void updateDetails(String id, String title) {
+        if (id != null && title != null) {
+            Log.d(LOG_KEY, "loading details for : " + title);
+            new DetailTask(this, fragmentView, title).execute(id);
+        }
+    }
+
+    protected void fillDetails() {
+        TextView title = (TextView) fragmentView.findViewById(R.id.title);
         title.setText(details.title);
 
-        TextView year = (TextView) view.findViewById(R.id.year);
+        TextView year = (TextView) fragmentView.findViewById(R.id.year);
         year.setText(details.year);
 
-        TextView length = (TextView) view.findViewById(R.id.length);
+        TextView length = (TextView) fragmentView.findViewById(R.id.length);
         length.setText(details.runtime);
 
-        TextView rating = (TextView) view.findViewById(R.id.rating);
+        TextView rating = (TextView) fragmentView.findViewById(R.id.rating);
         rating.setText(details.rating);
 
-        final TextView description = (TextView) view.findViewById(R.id.description);
+        final TextView description = (TextView) fragmentView.findViewById(R.id.description);
         description.setText(details.description);
 
-        ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail_poster);
+        ImageView thumbnail = (ImageView) fragmentView.findViewById(R.id.thumbnail_poster);
         Glide.with(getContext())
                 .load(THUMBNAIL_URL + details.image)
                 .error(android.R.drawable.ic_dialog_alert)
                 .into(thumbnail);
 
-        FloatingActionButton button = (FloatingActionButton) view.findViewById(R.id.favorite);
+        FloatingActionButton button = (FloatingActionButton) fragmentView.findViewById(R.id.favorite);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 details.favorite = !details.favorite;
+                setFavorite();
                 Toast.makeText(getContext(), details.favorite ? getString(R.string.silly_like) : getString(R.string.silly_dislike), Toast.LENGTH_SHORT).show();
                 styleFavoriteButton((FloatingActionButton) v);
             }
         });
         styleFavoriteButton(button);
 
-        ListView comboList = (ListView) view.findViewById(R.id.combo_list);
+        ListView comboList = (ListView) fragmentView.findViewById(R.id.combo_list);
         comboAdapter = new ComboAdapter(getContext(), details.trailers, details.reviews);
 
         if (details.trailers != null && details.trailers.size() > 0) {
@@ -151,6 +173,10 @@ public class DetailFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        setFavorite();
+    }
+
+    private void setFavorite() {
         favorites.setFavorite(details.id, details.favorite);
     }
 

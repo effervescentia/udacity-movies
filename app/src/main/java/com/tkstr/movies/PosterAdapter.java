@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class PosterAdapter extends ArrayAdapter<PosterAdapter.MovieHolder> {
 
-    private static final String BASE_URL = "http://image.tmdb.org/t/p/w185";
+    private static final String BASE_URL = "http://image.tmdb.org/t/p/w300";
 
     public PosterAdapter(Context context, List<MovieHolder> imageUrls) {
         super(context, -1, imageUrls);

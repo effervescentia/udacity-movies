@@ -58,7 +58,7 @@ public class DetailTask extends NetworkTask<DetailHolder> {
     @Override
     protected void onPostExecute(DetailHolder details) {
         if (details != null) {
-            fragment.setDetails(details).fillDetails(view);
+            fragment.setDetails(details).fillDetails();
         }
         super.onPostExecute(details);
     }

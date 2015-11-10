@@ -1,7 +1,6 @@
 package com.tkstr.movies;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -9,9 +8,10 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -22,8 +22,6 @@ import java.util.Set;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.tkstr.movies.DetailFragment.ID_KEY;
-import static com.tkstr.movies.DetailFragment.TITLE_KEY;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 /**
@@ -38,6 +36,7 @@ public class DiscoveryFragment extends Fragment {
     public static final String SORT_KEY = "sort";
 
     private PosterAdapter adapter;
+    private GridView grid;
     private ArrayList<MovieHolder> movies = new ArrayList<>();
     private String sort = SORT_POPULARITY;
     private FavoritePrefs favorites;
@@ -45,6 +44,7 @@ public class DiscoveryFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (savedInstanceState != null) {
             sort = savedInstanceState.getString(SORT_KEY);
             movies = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
@@ -53,31 +53,24 @@ public class DiscoveryFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_discovery, menu);
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_discovery, container, false);
+        grid = (GridView) inflater.inflate(R.layout.fragment_discovery, container, false);
 
-        GridView posterGrid = (GridView) v;
         adapter = new PosterAdapter(getContext(), movies);
         if (emptyIfNull(movies).isEmpty()) {
             reload();
         }
-        posterGrid.setAdapter(adapter);
-        posterGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MovieHolder movie = adapter.getItem(position);
-                String movieId = movie.id;
-                String title = movie.title;
+        grid.setAdapter(adapter);
 
-                Intent intent = new Intent(getContext(), DetailActivity.class);
-                intent.putExtra(ID_KEY, movieId);
-                intent.putExtra(TITLE_KEY, title);
-                startActivity(intent);
-            }
-        });
-
-        return v;
+        return grid;
     }
 
     @Override
@@ -94,6 +87,22 @@ public class DiscoveryFragment extends Fragment {
 
     public String getSort() {
         return sort;
+    }
+
+    public PosterAdapter getAdapter() {
+        return adapter;
+    }
+
+    public void setAdapter(PosterAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    public GridView getGrid() {
+        return grid;
+    }
+
+    public void setGrid(GridView grid) {
+        this.grid = grid;
     }
 
     public void reload() {
